@@ -7,7 +7,7 @@ s.boot;
 )
 
 // read a soundfile
-d = Buffer.read(s, "/home/matt/ownCloud/TEACHING/2020/SYDE362-W2020/Deliverables/P2 ML/s1.wav");
+d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Real World Failures/Real World Failure-300-2.wav");
 
 // now play it
 (
@@ -23,11 +23,11 @@ Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
 
 (
 x = {
-    var in, fft, array;
-	in = PlayBuf.ar(1, d, BufRateScale.kr(d), loop: 1);
-    fft = FFT(LocalBuf(1024), in);  // for sampling rates 44100 and 48000
-    array = MFCC.kr(fft);
-	Out.kr(0, array); // control bus out
+var in, fft, array;
+in = PlayBuf.ar(1, d, BufRateScale.kr(d), loop: 1);
+fft = FFT(LocalBuf(1024), in); // for sampling rates 44100 and 48000
+array = MFCC.kr(fft);
+Out.kr(0, array); // control bus out
 }.play;
 )
 
@@ -40,9 +40,10 @@ c = Bus(\control, 0, 13);
 r = {
 
     inf.do {
-		c.getn(13, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
-		0.01.wait; // 25 frames per second
+    	c.getn(13, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+    	0.01.wait; // 25 frames per second
     }
+
 }.fork
 )
 
