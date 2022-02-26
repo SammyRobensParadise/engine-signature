@@ -7,7 +7,7 @@ s.boot;
 )
 
 // read a soundfile
-d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Real World Failures/Real World Failure-300-2.wav");
+d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Real World Failures/Real World Failure-300-3.wav");
 
 // now play it
 (
