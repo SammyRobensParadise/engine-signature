@@ -18,6 +18,10 @@ const Home: NextPage = () => {
     socket.on('connect', () => {
       console.log('connected');
     });
+
+    socket.on('osc', () => {
+      debugger;
+    });
   };
 
   return (

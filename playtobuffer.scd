@@ -13,17 +13,14 @@ a = ['1','2','3','4','5','6', '7', '8', '9', '10];
 c = ['1','2','3','4','5','6', '7', '8', '9', '10];
 
 //Create a routine to populate c with buffers
-x = Routine({ a.do({ arg item, i; c[i] = Buffer.read(s,("/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-" ++ item ++".wav")); }); });
+x = Routine({ a.do({ arg item, i; c[i] = Buffer.read(s,("~/engine-signature/Real World Failures/Real World Failure-300-" ++ item ++".wav")); }); });
 x.nextN(1);
 c.postln;
-
-
 
 // read a soundfile
 // d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-2.wav");
 
 // e = Buffer.read(s, b[2]);
-
 
 // now play it
 // replace c[2] with c[i] for desired sound from list of buffers
