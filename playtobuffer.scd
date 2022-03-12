@@ -6,14 +6,38 @@
 s.boot;
 )
 
+x = 5;
+y = x.repeat(6);
+y.nextN(8);
+
+a = ['1','2','3','4','5','6'];
+b = [1,1,1,1,1,1,1,1,11]
+x = Routine({ a.do({ arg item, i; b[i] =("/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-" ++ item ++".wav") }); });
+x.nextN(1);
+b[2].postln;
+
+
+a = ['1','2','3','4','5','6'];
+c = ['1','2','3','4','5','6'];
+x = Routine({ a.do({ arg item, i; c[i] = Buffer.read(s,("/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-" ++ item ++".wav")); }); });
+x.nextN(1);
+c.postln;
+
+
+
 // read a soundfile
-d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Real World Failures/Real World Failure-300-3.wav");
+d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-2.wav");
+
+e = Buffer.read(s, b[2]);
+
+a[0].postln;
+d.postln;
 
 // now play it
 (
 y = SynthDef("tutorial-PlayBuf",{ arg out = 0, bufnum;
 Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
-}).play(s,[\bufnum, d.bufnum ]);
+}).play(s,[\bufnum, c[2].bufnum ]);
 )
 
 (
