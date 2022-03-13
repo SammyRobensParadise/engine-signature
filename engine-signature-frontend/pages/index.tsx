@@ -7,6 +7,7 @@ import ConnectionStatus from '../components/connection-status';
 import { Switch, Card, Alert } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
+import SoundBars from '../components/soundbars';
 
 /**
  * declare a websocket instance on server rendered code
@@ -24,10 +25,11 @@ function average2D(array: number[][]): number[] {
 }
 
 const Home: NextPage = () => {
-  const [latestValues, setLatestValues] = useState<number[]>();
+  const [latestValues, setLatestValues] = useState<number[]>([]);
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
+  const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 0.5, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
 
   /**
@@ -137,6 +139,22 @@ const Home: NextPage = () => {
                 </Alert>
               )}
             </div>
+            <Card className='px-4 py-2'>
+              <div className='flex space-x-4'>
+                <p className='py-2'>Error Threshold</p>
+                <p className='py-2'>{errorThreshold.x}</p>
+                <div className='pt-2'>
+                  <Slider
+                    axis='x'
+                    x={errorThreshold.x}
+                    onChange={({ x }) => setErrorThreshold((state) => ({ ...state, x }))}
+                    xmin={0}
+                    xmax={1}
+                    xstep={0.1}
+                  />
+                </div>
+              </div>
+            </Card>
           </div>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Output</h2>
@@ -145,9 +163,9 @@ const Home: NextPage = () => {
               <ConnectionStatus status={socketStatus} />
             </div>
             <div className='flex space-x-4'>
-              <p className='pt-2'>Outputs</p>
-              <span>{JSON.stringify(latestValues)}</span>
+              <p className='pt-2'>Output Magnitude:</p>
             </div>
+            <SoundBars data={latestValues} threshold={errorThreshold.x} />
           </div>
         </div>
       </main>
