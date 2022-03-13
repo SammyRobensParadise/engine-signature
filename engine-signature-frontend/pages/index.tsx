@@ -2,25 +2,33 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import io from 'Socket.IO-client';
 import { useCallback, useEffect, useState } from 'react';
-import { ConnnectionStates } from '../local';
+import { ConnnectionStates, SocketMessage } from '../local';
 import ConnectionStatus from '../components/connection-status';
 import { Switch, Card } from 'ui-neumorphism';
 import 'ui-neumorphism/dist/index.css';
+
+const average = (arr: number[][]) =>
+  arr.reduce((a, b) => {
+    debugger;
+    return a + b;
+  }, 0) / arr.length;
 
 /**
  * declare a websocket instance on server rendered code
  */
 let socket;
-let average: number[][] = [];
 const Home: NextPage = () => {
   const [latestValues, setLatestValues] = useState();
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
+  const [sensitivity, setSensitivity] = useState<number>(100);
 
   /**
    * Initializes the websocket to the server
    */
   const initiSocket = useCallback(async () => {
+    let average: number[][] = [];
+
     await fetch('/api/socket');
     socket = io();
 
@@ -31,12 +39,22 @@ const Home: NextPage = () => {
       updateSocketStatus('CLOSED');
     });
 
-    socket.on('osc', (message) => {
+    socket.on('osc', (message: SocketMessage) => {
       if (socketStatus !== 'CLOSED' && socketStatus !== 'ERROR') {
-        setLatestValues(message.message.args);
+        const { args } = message.message;
+        const e: number[] = new Array(args.length);
+        args.forEach((arg, index) => {
+          e[index] = arg.value;
+        });
+        average.push(e);
+        if (average.length > sensitivity) {
+          console.log('clear');
+          average = [];
+        }
+        console.log(average);
       }
     });
-  }, [socketStatus]);
+  }, [socketStatus, sensitivity]);
 
   /**
    * Side Effect Hook to handle the websocket connection
