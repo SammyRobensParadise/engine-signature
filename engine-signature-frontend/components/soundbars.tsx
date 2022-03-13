@@ -7,6 +7,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
   Cell,
 } from 'recharts';
 
@@ -27,15 +28,21 @@ export default function SoundBars({ data, threshold = 0.9 }: SoundBarsInterface)
       <BarChart width={500} height={300} data={dataMap}>
         <CartesianGrid strokeDasharray='3 3' />
         <XAxis dataKey='name' />
-        <YAxis />
+        <YAxis type='number' />
         <Tooltip />
         <Legend />
-        <Bar dataKey='Presence' stackId='a'>
+        <Bar dataKey='Presence' stackId='a' label={`${data}`}>
           {' '}
           {data.map((_entry, index) => (
             <Cell key={Math.random()} fill={data[index] > threshold ? '#ff4242' : '#7aa4ff'} />
           ))}
         </Bar>
+        <ReferenceLine
+          y={threshold}
+          stroke='black'
+          label={`Threshold=${threshold}`}
+          strokeWidth='5 5'
+        />
       </BarChart>
     </ResponsiveContainer>
   );

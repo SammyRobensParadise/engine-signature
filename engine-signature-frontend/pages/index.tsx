@@ -8,6 +8,7 @@ import { Switch, Card, Alert } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
 import SoundBars from '../components/soundbars';
+import Detection from '../components/detections';
 
 /**
  * declare a websocket instance on server rendered code
@@ -61,7 +62,6 @@ const Home: NextPage = () => {
           setLatestValues(averages);
           average = [];
         }
-        console.log(average);
       }
     });
   }, [socketStatus, samplingSize]);
@@ -166,6 +166,7 @@ const Home: NextPage = () => {
               <p className='pt-2'>Output Magnitude:</p>
             </div>
             <SoundBars data={latestValues} threshold={errorThreshold.x} />
+            <Detection data={latestValues} threshold={errorThreshold.x} />
           </div>
         </div>
       </main>
