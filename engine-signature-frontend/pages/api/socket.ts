@@ -34,15 +34,13 @@ const SocketHandler = (_req: unknown, res: any) => {
     res.socket.server.io = io;
     io.on('connection', (socket) => {
       console.log('connected');
-      udpPort.on('ready', function () {
+      udpPort.on('ready', () => {
         var ipAddresses = getIPAddresses();
-
         console.log('Listening for OSC over UDP.');
         ipAddresses.forEach(function (address) {
           console.log(' Host:', address + ', Port:', udpPort.options.localPort);
         });
       });
-
       udpPort.on('message', function (oscMessage: any) {
         socket.emit('osc', { message: oscMessage });
       });
@@ -52,6 +50,10 @@ const SocketHandler = (_req: unknown, res: any) => {
       });
 
       udpPort.open();
+    });
+
+    io.on('end', (socket) => {
+      socket.disconnect();
     });
   }
   res.end();

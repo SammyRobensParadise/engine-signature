@@ -9,7 +9,7 @@ import ConnectionStatus from '../components/connection-status';
 let socket;
 
 const Home: NextPage = () => {
-  const [latestValues, setLatestValues] = useState(null);
+  const [latestValues, setLatestValues] = useState();
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpenn] = useState(false);
 
@@ -26,10 +26,7 @@ const Home: NextPage = () => {
 
     socket.on('osc', (message) => {
       if (socketStatus !== 'CLOSED' && socketStatus !== 'ERROR') {
-        console.log(message.message.args);
-        setInterval(() => {
-          setLatestValues(message.message.args);
-        }, 1000);
+        setLatestValues(message.message.args);
       }
     });
   }, [socketStatus]);
@@ -83,9 +80,12 @@ const Home: NextPage = () => {
               <p className='pt-2'>Conection Status:</p>
               <ConnectionStatus status={socketStatus} />
             </div>
+            <div className='flex space-x-4'>
+              <p className='pt-2'>Outputs</p>
+              <span>{JSON.stringify(latestValues)}</span>
+            </div>
           </div>
         </div>
-        <p>{JSON.stringify(latestValues)}</p>
       </main>
     </div>
   );
