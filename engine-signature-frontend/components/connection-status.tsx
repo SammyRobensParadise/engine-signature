@@ -1,16 +1,16 @@
 import { ConnnectionStates } from '../local';
-
-const style: Record<ConnnectionStates, string> = {
-  CLOSED: 'text-blue-700',
-  LISTENING: 'text-green-700',
-  CLOSING: 'text-blue-900',
-  ERROR: 'text-red-900',
+import { Chip } from 'ui-neumorphism';
+const style: Record<ConnnectionStates, 'success' | 'info' | 'warning' | 'error'> = {
+  CLOSED: 'info',
+  LISTENING: 'success',
+  CLOSING: 'warning',
+  ERROR: 'error',
 };
 
 export default function ConnectionStatus({ status }: { status: ConnnectionStates }) {
   return (
-    <div className={`${style[status]} bg-slate-100 rounded-full p-2`}>
+    <Chip type={style[status]}>
       <span>{status}</span>
-    </div>
+    </Chip>
   );
 }
