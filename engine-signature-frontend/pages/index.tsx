@@ -4,24 +4,31 @@ import io from 'Socket.IO-client';
 import { useCallback, useEffect, useState } from 'react';
 import { ConnnectionStates, SocketMessage } from '../local';
 import ConnectionStatus from '../components/connection-status';
-import { Switch, Card } from 'ui-neumorphism';
+import { Switch, Card, Alert } from 'ui-neumorphism';
+import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
-
-const average = (arr: number[][]) =>
-  arr.reduce((a, b) => {
-    debugger;
-    return a + b;
-  }, 0) / arr.length;
 
 /**
  * declare a websocket instance on server rendered code
  */
 let socket;
+
+function average2D(array: number[][]): number[] {
+  let result: number[] = new Array(array[0].length).fill(0);
+  array.forEach((dataPoint) => {
+    dataPoint.forEach((value, index) => {
+      result[index] = result[index] + Math.abs(value);
+    });
+  });
+  return result.map((sum) => sum / array.length);
+}
+
 const Home: NextPage = () => {
-  const [latestValues, setLatestValues] = useState();
+  const [latestValues, setLatestValues] = useState<number[]>();
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
-  const [sensitivity, setSensitivity] = useState<number>(100);
+  const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
+  const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
 
   /**
    * Initializes the websocket to the server
@@ -47,14 +54,15 @@ const Home: NextPage = () => {
           e[index] = arg.value;
         });
         average.push(e);
-        if (average.length > sensitivity) {
-          console.log('clear');
+        if (average.length >= samplingSize.x) {
+          const averages = average2D(average);
+          setLatestValues(averages);
           average = [];
         }
         console.log(average);
       }
     });
-  }, [socketStatus, sensitivity]);
+  }, [socketStatus, samplingSize]);
 
   /**
    * Side Effect Hook to handle the websocket connection
@@ -70,6 +78,13 @@ const Home: NextPage = () => {
     }
   }, [socketOpen, initiSocket]);
 
+  useEffect(() => {
+    if (samplingSize.x < 10) {
+      setShowPerformanceWarning(true);
+    } else {
+      setShowPerformanceWarning(false);
+    }
+  }, [samplingSize.x]);
   /**
    * toggles whether the websocket to the server is open
    */
@@ -100,6 +115,28 @@ const Home: NextPage = () => {
                 <Switch checked={socketOpen} onChange={togggleSocket} label='On' />
               </div>
             </Card>
+            <Card className='px-4 py-2'>
+              <div className='flex space-x-4'>
+                <p className='py-2'>Averaging Sample Size:</p>
+                <p className='py-2'>{samplingSize.x}</p>
+                <div className='pt-2'>
+                  <Slider
+                    axis='x'
+                    x={samplingSize.x}
+                    onChange={({ x }) => setSamplingSize((state) => ({ ...state, x }))}
+                    xmin={1}
+                    xmax={1000}
+                  />
+                </div>
+              </div>
+            </Card>
+            <div>
+              {showPerformaceWarning && (
+                <Alert type='warning' inset>
+                  A low sampling average can cause performance issues.
+                </Alert>
+              )}
+            </div>
           </div>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Output</h2>
