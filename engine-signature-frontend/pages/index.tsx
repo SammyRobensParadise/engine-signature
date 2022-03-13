@@ -19,8 +19,8 @@ const Home: NextPage = () => {
       console.log('connected');
     });
 
-    socket.on('osc', () => {
-      debugger;
+    socket.on('osc', (message) => {
+      console.log(message);
     });
   };
 

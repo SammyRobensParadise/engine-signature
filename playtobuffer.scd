@@ -8,7 +8,7 @@ s.boot;
 
 (
 
-~class = "C";
+~class = "A";
 //Let a be the number of samples of a type
 a = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 
@@ -16,7 +16,7 @@ a = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 c = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 
 //Create a routine to populate c with buffers
-x = Routine({ a.do({ arg item, i; c[i] = Buffer.read(s,("/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/"++ ~class ++ "\_" ++ item ++".wav")); }); });
+x = Routine({ a.do({ arg item, i; c[i] = Buffer.read(s,("/Users/sammyrobens-paradise/projects/engine-signature/Isolated Failure Sounds/"++ ~class ++ "\_" ++ item ++".wav")); }); });
 x.nextN(1);
 c.postln;
 )
@@ -52,7 +52,7 @@ Out.kr(0, array); // control bus out
 )
 
 (
-c = Bus(\control, 0, 13);
+c = Bus(\control, 0, 2);
 )
 
 // send coefficients
@@ -60,7 +60,7 @@ c = Bus(\control, 0, 13);
 r = {
 
     inf.do {
-    	c.getn(13, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+    	c.getn(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
     	0.01.wait; // 25 frames per second
     }
 
