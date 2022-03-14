@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import * as osc from 'osc';
 
+let threshold = 0.5;
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
   localPort: 12000,
@@ -27,11 +28,13 @@ const getIPAddresses = function () {
 
 const Analysis = (_req: unknown, res: any) => {
   if (res.socket.server.io) {
-    console.log('Socket is already running');
+    console.log('Analysis Socket is already running');
   } else {
-    console.log('Socket is initializing...');
+    console.log('Analysis Socket is initializing...');
+
     const io = new Server(res.socket.server);
     res.socket.server.io = io;
+
     io.on('connection', (socket) => {
       udpPort.open();
       console.log('connected');
@@ -49,8 +52,12 @@ const Analysis = (_req: unknown, res: any) => {
       udpPort.on('error', function (err: any) {
         console.log(err);
       });
-      socket.on('end', (args) => {
+      socket.on('end', () => {
         socket.disconnect();
+      });
+
+      socket.on('threshold', (args: number) => {
+        threshold = args / 100;
       });
     });
   }

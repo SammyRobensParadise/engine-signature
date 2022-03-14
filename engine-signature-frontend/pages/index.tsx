@@ -140,6 +140,12 @@ const Home: NextPage = () => {
     }
   }
 
+  useEffect(() => {
+    if (analysisSocket) {
+      analysisSocket.emit('threshold', errorThreshold);
+    }
+  }, [errorThreshold]);
+
   return (
     <div>
       <Head>
