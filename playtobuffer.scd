@@ -6,7 +6,7 @@
 s.boot;
 )
 
-(
+/*(
 
 ~class = "C";
 //Let a be the number of samples of a type
@@ -16,16 +16,20 @@ a = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 c = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 
 //Create a routine to populate c with buffers
-x = Routine({ a.do({ arg item, i; c[0] += Buffer.read(s,("/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/"++ ~class ++ "_" ++ item ++".wav")); }); });
+x = Routine({ a.do({ arg item, i; c[0] = Buffer.read(s,("/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/"++ ~class ++ "_" ++ item ++".wav")); }); });
 x.nextN(1);
 c.postln;
-)
+)*/
 
 // read a soundfile
 // d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-2.wav");
 
 // e = Buffer.read(s, b[2]);
-d = c[3]
+// d = c[3]
+(
+~class = "C";
+d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class+ "_Concat.wav");
+)
 
 // now play it
 // replace c[2] with c[i] for desired sound from list of buffers
