@@ -98,16 +98,17 @@ void draw()
 //This is called automatically when OSC message is received
 void oscEvent(OscMessage theOscMessage) {
  if (theOscMessage.checkAddrPattern("/wek/outputs")==true) {
-     if(theOscMessage.checkTypetag("ffff")) { //Now looking for parameters
+   println(theOscMessage);
+     if(theOscMessage.checkTypetag("ff")) { //Now looking for parameters
         float p1 = theOscMessage.get(0).floatValue(); //get first parameter
         float p2 = theOscMessage.get(1).floatValue(); //get second parameter
-        float p3 = theOscMessage.get(2).floatValue(); //get third parameter
-        float p4 = theOscMessage.get(3).floatValue(); //get fourth parameter
+      //  float p3 = theOscMessage.get(2).floatValue(); //get third parameter
+        //float p4 = theOscMessage.get(3).floatValue(); //get fourth parameter
         
         nextValue1(p1);
         nextValue2(p2);
-        nextValue3(p3);
-        nextValue4(p4);
+       // nextValue3(p3);
+        // nextValue4(p4);
         
         //println("Received new params value from Wekinator");  
       } else {
