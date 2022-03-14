@@ -103,12 +103,14 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Engine Signature</title>
+        <title>Engine Signature Version</title>
         <meta name='description' content='Engine Signature Detection' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <Card>
-        <h1 className='font-sans text-center text-2xl p-4'>Engine Signature Detection</h1>
+      <div className=' bg-slate-100 h-screen'>
+        <h1 className='font-sans text-center text-2xl p-4'>
+          Engine Signature Detection Version 0.1.0
+        </h1>
         <div className='grid grid-cols-2 gap-4 p-8'>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Control Panel</h2>
@@ -122,7 +124,7 @@ const Home: NextPage = () => {
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
                 <p className='py-2'>Moving Average Sample Size:</p>
-                <p className='py-2'>{samplingSize.x}</p>
+                <p className='py-2 w-6'>{samplingSize.x}</p>
                 <div className='pt-2'>
                   <Slider
                     axis='x'
@@ -144,7 +146,7 @@ const Home: NextPage = () => {
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
                 <p className='py-2'>Error Threshold</p>
-                <p className='py-2 w-6'>{errorThreshold.x}%</p>
+                <p className='py-2 w-8'>{errorThreshold.x}%</p>
                 <div className='pt-2'>
                   <Slider
                     axis='x'
@@ -171,7 +173,7 @@ const Home: NextPage = () => {
             <Detection data={latestValues} threshold={errorThreshold.x / 100} />
           </div>
         </div>
-      </Card>
+      </div>
     </div>
   );
 };

@@ -6,29 +6,34 @@
 s.boot;
 )
 
+// read a soundfile
+d = Buffer.read(s, "/home/matt/ownCloud/TEACHING/2020/SYDE362-W2020/Deliverables/P2 ML/s1.wav");
 
-// Monitor Input
-{Out.ar(0,[SoundIn.ar(0), SoundIn.ar(0)])}.play;
+// now play it
+(
+y = SynthDef("tutorial-PlayBuf",{ arg out = 0, bufnum;
+Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
+}).play(s,[\bufnum, d.bufnum ]);
+)
 
 (
 // create a network address and assign it to a global variable
 ~toWekinator = NetAddr.new("127.0.0.1", 6448);
 )
 
-// test sending a message
-~toWekinator.sendMsg("/wek/inputs", 0.0, 0.4);
-
 (
 x = {
     var in, fft, array;
-    in = SoundIn.ar(0);
+	in = PlayBuf.ar(1, d, BufRateScale.kr(d), loop: 1);
     fft = FFT(LocalBuf(1024), in);  // for sampling rates 44100 and 48000
     array = MFCC.kr(fft);
 	Out.kr(0, array); // control bus out
 }.play;
 )
 
+(
 c = Bus(\control, 0, 2);
+)
 
 // send coefficients
 (
@@ -38,7 +43,6 @@ r = {
 		c.getn(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
 		0.01.wait; // 25 frames per second
     }
-
 }.fork
 )
 
