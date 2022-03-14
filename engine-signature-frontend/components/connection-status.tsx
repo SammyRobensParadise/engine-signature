@@ -5,6 +5,7 @@ const style: Record<ConnnectionStates, 'success' | 'info' | 'warning' | 'error'>
   LISTENING: 'success',
   CLOSING: 'warning',
   ERROR: 'error',
+  OPEN: 'success',
 };
 
 export default function ConnectionStatus({ status }: { status: ConnnectionStates }) {

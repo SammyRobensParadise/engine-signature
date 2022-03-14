@@ -1,5 +1,14 @@
 import { Server } from 'socket.io';
 import * as osc from 'osc';
+import { average2D } from '../../utils/utils';
+
+let threshold = 0.5;
+
+let samplingSize = 10;
+
+let average: number[][] = [];
+
+let recordData = false;
 
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
@@ -45,14 +54,35 @@ const SocketHandler = (_req: unknown, res: any) => {
         socket.emit('osc', { message: oscMessage });
       });
 
-      udpPort.on('error', function (err: any) {
+      udpPort.on('error', function (err: Error) {
         console.log(err);
       });
-      socket.on('end', (args) => {
+
+      socket.on('end', () => {
         socket.disconnect();
       });
 
-      udpPort.open();
+      socket.on('threshold', (args: number) => {
+        threshold = args / 100;
+      });
+
+      socket.on('size', (args: number) => {
+        samplingSize = args;
+      });
+
+      socket.on('listen', () => {
+        udpPort.open();
+      });
+
+      socket.on('record', () => {
+        recordData = true;
+      });
+      socket.on('stop-recording', () => {
+        recordData = false;
+      });
+      socket.on('stop', () => {
+        udpPort.close();
+      });
     });
   }
   res.end();

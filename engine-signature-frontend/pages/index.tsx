@@ -16,14 +16,13 @@ import { average2D } from '../utils/utils';
  * declare a websocket instance on server rendered code
  */
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
-let analysisSocket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 const Home: NextPage = () => {
   const [latestValues, setLatestValues] = useState<number[]>([]);
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
-  const [analysisSocketStatus, updateAnalysisSocketStatus] = useState<ConnnectionStates>('CLOSED');
-  const [analysisSocketOpen, setAnalysisSocketOpen] = useState(false);
+  const [listen, setListen] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
@@ -39,7 +38,7 @@ const Home: NextPage = () => {
     socket = io();
 
     socket.on('connect', () => {
-      updateSocketStatus('LISTENING');
+      updateSocketStatus('OPEN');
       startTime.current = Date.now();
     });
     socket.on('disconnect', () => {
@@ -67,17 +66,6 @@ const Home: NextPage = () => {
     });
   }, [socketStatus, samplingSize]);
 
-  const initAnalysisSocket = useCallback(async () => {
-    await fetch('/api/analysis');
-    analysisSocket = io();
-    analysisSocket.on('connect', () => {
-      updateAnalysisSocketStatus('LISTENING');
-    });
-
-    analysisSocket.on('error', () => {
-      updateAnalysisSocketStatus('ERROR');
-    });
-  }, []);
   /**
    * Side Effect Hook to handle the websocket connection
    */
@@ -92,17 +80,6 @@ const Home: NextPage = () => {
       updateSocketStatus('CLOSED');
     }
   }, [socketOpen, initiSocket]);
-
-  useEffect(() => {
-    if (analysisSocketOpen) {
-      initAnalysisSocket();
-    } else {
-      if (analysisSocket) {
-        analysisSocket.emit('end', true);
-      }
-      updateAnalysisSocketStatus('CLOSED');
-    }
-  }, [analysisSocketOpen, initAnalysisSocket]);
 
   useEffect(() => {
     if (samplingSize.x < 10) {
@@ -122,25 +99,53 @@ const Home: NextPage = () => {
     }
   }
 
-  function toggleAnalysisSocket() {
-    if (analysisSocketOpen) {
-      setAnalysisSocketOpen(false);
+  function toggleListen() {
+    if (listen) {
+      setListen(false);
     } else {
-      setAnalysisSocketOpen(true);
+      setListen(true);
+    }
+  }
+
+  function toggleRecording() {
+    if (recording) {
+      setRecording(false);
+    } else {
+      setRecording(true);
     }
   }
 
   useEffect(() => {
-    if (analysisSocket) {
-      analysisSocket.emit('threshold', errorThreshold);
+    if (socket) {
+      socket.emit('threshold', errorThreshold);
     }
   }, [errorThreshold]);
 
   useEffect(() => {
-    if (samplingSize.x) {
-      analysisSocket.emit('size', samplingSize.x);
+    if (samplingSize.x && socket) {
+      socket.emit('size', samplingSize.x);
     }
   }, [samplingSize.x]);
+
+  useEffect(() => {
+    if (socket) {
+      if (listen) {
+        socket.emit('listen', true);
+      } else {
+        socket.emit('close', true);
+      }
+    }
+  }, [listen]);
+
+  useEffect(() => {
+    if (socket) {
+      if (recording) {
+        socket.emit('record', true);
+      } else {
+        socket.emit('stop-recording', true);
+      }
+    }
+  }, [recording]);
 
   return (
     <div>
@@ -158,13 +163,13 @@ const Home: NextPage = () => {
             <h2 className='font-sans text-left text-xl'>Control Panel</h2>
             <Card className='px-4'>
               <div className='flex space-x-4'>
-                <p className='pt-2'>Connection:</p>
+                <p className='pt-2 pr-4'>Connection:</p>
                 <span className='pt-2'>Off</span>{' '}
                 <Switch checked={socketOpen} onChange={togggleSocket} label='On' />
                 <div className='pt-2'>
                   <Chip type='info'>
                     <div className='w-44'>
-                      Uptime:{' '}
+                      Socket Uptime:{' '}
                       <span className='w-24 font-semibold'>
                         {(Date.now() - startTime.current) / 1000}
                       </span>{' '}
@@ -174,10 +179,14 @@ const Home: NextPage = () => {
                 </div>
               </div>
               <div className='flex space-x-4'>
-                <p className='pt-2 pr-2'>Analysis:</p>
+                <p className='pt-2 pr-14'>Listen:</p>
                 <span className='pt-2'>Off</span>{' '}
-                <Switch checked={socketOpen} onChange={toggleAnalysisSocket} label='On' />
-                <ConnectionStatus status={analysisSocketStatus} />
+                <Switch checked={listen} onChange={toggleListen} label='On' />
+              </div>
+              <div className='flex space-x-4'>
+                <p className='pt-2 pr-2'>Record Input:</p>
+                <span className='pt-2'>Off</span>{' '}
+                <Switch checked={socketOpen} onChange={toggleListen} label='On' />
               </div>
             </Card>
             <Card className='px-4 py-2'>
@@ -212,7 +221,7 @@ const Home: NextPage = () => {
             </div>
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
-                <p className='py-2'>Error Threshold</p>
+                <p className='py-2'>Error Threshold:</p>
                 <p className='py-2 w-8'>{errorThreshold.x}%</p>
                 <div className='pt-2'>
                   <Slider
@@ -240,7 +249,8 @@ const Home: NextPage = () => {
             <h2 className='font-sans text-left text-xl'>Output</h2>
             <div className='flex space-x-4'>
               <p>Connection Status:</p>
-              <ConnectionStatus status={socketStatus} />
+              <ConnectionStatus status={socketStatus} /> <p>OSC Port Status:</p>
+              <ConnectionStatus status={listen ? 'LISTENING' : 'CLOSED'} />
             </div>
             <div className='flex space-x-4'>
               <p className='pt-2'>Output Magnitude:</p>
