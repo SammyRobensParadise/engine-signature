@@ -1,6 +1,6 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
-import io from 'Socket.IO-client';
+import io, { Socket } from 'Socket.IO-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConnnectionStates, SocketMessage } from '../local';
 import ConnectionStatus from '../components/connection-status';
@@ -10,11 +10,12 @@ import 'ui-neumorphism/dist/index.css';
 import SoundBars from '../components/soundbars';
 import Detection from '../components/detections';
 import ErrorCountPieChart from '../components/error-count-pie-chart';
+import { DefaultEventsMap } from '@socket.io/component-emitter';
 
 /**
  * declare a websocket instance on server rendered code
  */
-let socket;
+let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 function average2D(array: number[][]): number[] {
   let result: number[] = new Array(array[0].length).fill(0);
@@ -77,8 +78,9 @@ const Home: NextPage = () => {
       initiSocket();
     } else {
       updateSocketStatus('CLOSING');
-      socket = io();
-      socket.emit('end');
+      if (socket) {
+        socket.emit('end', true);
+      }
       updateSocketStatus('CLOSED');
     }
   }, [socketOpen, initiSocket]);

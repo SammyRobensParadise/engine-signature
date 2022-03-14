@@ -48,12 +48,15 @@ const SocketHandler = (_req: unknown, res: any) => {
       udpPort.on('error', function (err: any) {
         console.log(err);
       });
+      socket.on('end', (args) => {
+        console.log(args);
+        debugger;
+      });
 
       udpPort.open();
     });
-
-    io.on('end', (socket) => {
-      socket.disconnect();
+    io.on('disconnect', () => {
+      debugger;
     });
   }
   res.end();
