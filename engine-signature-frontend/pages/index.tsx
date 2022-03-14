@@ -16,6 +16,7 @@ import { DefaultEventsMap } from '@socket.io/component-emitter';
  * declare a websocket instance on server rendered code
  */
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
+let analysisSocket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
 function average2D(array: number[][]): number[] {
   let result: number[] = new Array(array[0].length).fill(0);
@@ -31,6 +32,8 @@ const Home: NextPage = () => {
   const [latestValues, setLatestValues] = useState<number[]>([]);
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
+  const [analysisSocketStatus, updateAnalysisSocketStatus] = useState<ConnnectionStates>('CLOSED');
+  const [analysisSocketOpen, setAnalysisSocketOpen] = useState(false);
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
@@ -53,6 +56,10 @@ const Home: NextPage = () => {
       updateSocketStatus('CLOSED');
     });
 
+    socket.on('error', () => {
+      updateSocketStatus('ERROR');
+    });
+
     socket.on('osc', (message: SocketMessage) => {
       if (socketStatus !== 'CLOSED' && socketStatus !== 'ERROR') {
         const { args } = message.message;
@@ -70,6 +77,17 @@ const Home: NextPage = () => {
     });
   }, [socketStatus, samplingSize]);
 
+  const initAnalysisSocket = useCallback(async () => {
+    await fetch('/api/analysis');
+    analysisSocket = io();
+    analysisSocket.on('connect', () => {
+      updateAnalysisSocketStatus('LISTENING');
+    });
+
+    analysisSocket.on('error', () => {
+      updateAnalysisSocketStatus('ERROR');
+    });
+  }, []);
   /**
    * Side Effect Hook to handle the websocket connection
    */
@@ -86,6 +104,17 @@ const Home: NextPage = () => {
   }, [socketOpen, initiSocket]);
 
   useEffect(() => {
+    if (analysisSocketOpen) {
+      initAnalysisSocket();
+    } else {
+      if (analysisSocket) {
+        analysisSocket.emit('end', true);
+      }
+      updateAnalysisSocketStatus('CLOSED');
+    }
+  }, [analysisSocketOpen, initAnalysisSocket]);
+
+  useEffect(() => {
     if (samplingSize.x < 10) {
       setShowPerformanceWarning(true);
     } else {
@@ -100,6 +129,14 @@ const Home: NextPage = () => {
       setSocketOpen(false);
     } else {
       setSocketOpen(true);
+    }
+  }
+
+  function toggleAnalysisSocket() {
+    if (analysisSocketOpen) {
+      setAnalysisSocketOpen(false);
+    } else {
+      setAnalysisSocketOpen(true);
     }
   }
 
@@ -133,6 +170,12 @@ const Home: NextPage = () => {
                     </div>
                   </Chip>
                 </div>
+              </div>
+              <div className='flex space-x-4'>
+                <p className='pt-2 pr-2'>Analysis:</p>
+                <span className='pt-2'>Off</span>{' '}
+                <Switch checked={socketOpen} onChange={toggleAnalysisSocket} label='On' />
+                <ConnectionStatus status={analysisSocketStatus} />
               </div>
             </Card>
             <Card className='px-4 py-2'>

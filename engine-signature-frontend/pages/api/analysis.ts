@@ -26,23 +26,34 @@ const getIPAddresses = function () {
 };
 
 const Analysis = (_req: unknown, res: any) => {
-  udpPort.on('ready', () => {
-    var ipAddresses = getIPAddresses();
-    console.log('Listening for OSC over UDP.');
-    ipAddresses.forEach(function (address) {
-      console.log(' Host:', address + ', Port:', udpPort.options.localPort);
+  if (res.socket.server.io) {
+    console.log('Socket is already running');
+  } else {
+    console.log('Socket is initializing...');
+    const io = new Server(res.socket.server);
+    res.socket.server.io = io;
+    io.on('connection', (socket) => {
+      udpPort.open();
+      console.log('connected');
+      udpPort.on('ready', () => {
+        var ipAddresses = getIPAddresses();
+        console.log('Listening for OSC over UDP.');
+        ipAddresses.forEach(function (address) {
+          console.log(' Host:', address + ', Port:', udpPort.options.localPort);
+        });
+      });
+      udpPort.on('message', function (oscMessage: any) {
+        console.log(oscMessage);
+      });
+
+      udpPort.on('error', function (err: any) {
+        console.log(err);
+      });
+      socket.on('end', (args) => {
+        socket.disconnect();
+      });
     });
-  });
-  udpPort.on('message', function (oscMessage: any) {
-    console.log(oscMessage);
-  });
-
-  udpPort.on('error', function (err: any) {
-    console.log(err);
-  });
-
-  udpPort.open();
-
+  }
   res.end();
 };
 
