@@ -27,9 +27,8 @@ Once the [UDP](https://en.wikipedia.org/wiki/User_Datagram_Protocol) connection 
 
 ## Known bugs
 
-1. Currently the WebSocket is not closing as expected, The easiest way to deal with this is to just refresh the window.
-2. There is no localStorage enabled yet, so settings are not saved.
-3. There is a significant performance penalty when a low averaging window is chosen because it means that `setState` is being automatically throttled by react. While this does not result in data loss, it means that the UI can become unresponsive after a long time of running the application.
+1. There is no localStorage enabled yet, so settings are not saved.
+2. There is a significant performance penalty when a low averaging window is chosen because it means that `setState` is being automatically throttled by react. While this does not result in data loss, it means that the UI can become unresponsive after a long time of running the application.
 
 ## Usage
 
