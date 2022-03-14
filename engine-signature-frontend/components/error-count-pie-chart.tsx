@@ -24,7 +24,7 @@ export default function ErrorCountPieChart({ data, threshold = 0.9 }: SoundBarsI
   }, [data, threshold]);
 
   const dataGroup = errorCounts.map((value, index) => {
-    return { name: `Feature-${index}`, value: value };
+    return { name: `Feature-${index + 1}`, value: value };
   });
   return (
     <Card className='pb-4'>
