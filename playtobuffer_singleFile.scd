@@ -7,7 +7,7 @@ s.boot;
 )
 
 // read a soundfile
-d = Buffer.read(s, "/home/matt/ownCloud/TEACHING/2020/SYDE362-W2020/Deliverables/P2 ML/s1.wav");
+d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Isolated Failure Sounds/Background\ Noise.wav");
 
 // now play it
 (
@@ -32,7 +32,7 @@ x = {
 )
 
 (
-c = Bus(\control, 0, 2);
+c = Bus(\control, 0, 4);
 )
 
 // send coefficients
@@ -40,7 +40,7 @@ c = Bus(\control, 0, 2);
 r = {
 
     inf.do {
-		c.getn(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+		c.getn(4, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
 		0.01.wait; // 25 frames per second
     }
 }.fork
