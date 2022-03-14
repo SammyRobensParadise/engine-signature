@@ -180,7 +180,7 @@ const Home: NextPage = () => {
                 <Button
                   depressed
                   onClick={() => {
-                    setSamplingSize((state) => ({ ...state, x: 50 }));
+                    setErrorThreshold((state) => ({ ...state, x: 50 }));
                   }}
                 >
                   Reset
