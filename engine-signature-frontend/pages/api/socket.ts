@@ -49,14 +49,10 @@ const SocketHandler = (_req: unknown, res: any) => {
         console.log(err);
       });
       socket.on('end', (args) => {
-        console.log(args);
-        debugger;
+        socket.disconnect();
       });
 
       udpPort.open();
-    });
-    io.on('disconnect', () => {
-      debugger;
     });
   }
   res.end();
