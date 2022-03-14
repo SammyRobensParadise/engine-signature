@@ -1,7 +1,13 @@
 import { Server } from 'socket.io';
 import * as osc from 'osc';
+import { average2D } from '../../utils/utils';
 
 let threshold = 0.5;
+
+let samplingSize = 10;
+
+let average: number[][] = [];
+
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
   localPort: 12000,
@@ -45,9 +51,22 @@ const Analysis = (_req: unknown, res: any) => {
           console.log(' Host:', address + ', Port:', udpPort.options.localPort);
         });
       });
-      udpPort.on('message', function (oscMessage: any) {
-        console.log(oscMessage);
-      });
+      udpPort.on(
+        'message',
+        function (oscMessage: { address: string; args: Array<{ type: string; value: number }> }) {
+          const { args } = oscMessage;
+          const e: number[] = new Array(args.length);
+          args.forEach((arg, index) => {
+            e[index] = arg.value;
+          });
+          average.push(e);
+          if (average.length >= samplingSize) {
+            const averages = average2D(average);
+            console.log(averages);
+            average = [];
+          }
+        },
+      );
 
       udpPort.on('error', function (err: any) {
         console.log(err);
@@ -58,6 +77,10 @@ const Analysis = (_req: unknown, res: any) => {
 
       socket.on('threshold', (args: number) => {
         threshold = args / 100;
+      });
+
+      socket.on('size', (args: number) => {
+        samplingSize = args;
       });
     });
   }

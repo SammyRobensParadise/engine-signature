@@ -11,22 +11,12 @@ import SoundBars from '../components/soundbars';
 import Detection from '../components/detections';
 import ErrorCountPieChart from '../components/error-count-pie-chart';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
-
+import { average2D } from '../utils/utils';
 /**
  * declare a websocket instance on server rendered code
  */
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 let analysisSocket: Socket<DefaultEventsMap, DefaultEventsMap>;
-
-function average2D(array: number[][]): number[] {
-  let result: number[] = new Array(array[0].length).fill(0);
-  array.forEach((dataPoint) => {
-    dataPoint.forEach((value, index) => {
-      result[index] = result[index] + Math.abs(value);
-    });
-  });
-  return result.map((sum) => sum / array.length);
-}
 
 const Home: NextPage = () => {
   const [latestValues, setLatestValues] = useState<number[]>([]);
@@ -145,6 +135,12 @@ const Home: NextPage = () => {
       analysisSocket.emit('threshold', errorThreshold);
     }
   }, [errorThreshold]);
+
+  useEffect(() => {
+    if (samplingSize.x) {
+      analysisSocket.emit('size', samplingSize.x);
+    }
+  }, [samplingSize.x]);
 
   return (
     <div>
