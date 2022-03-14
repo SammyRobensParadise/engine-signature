@@ -8,7 +8,7 @@ s.boot;
 
 (
 
-~class = "A";
+~class = "D";
 //Let a be the number of samples of a type
 a = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 
@@ -52,7 +52,7 @@ Out.kr(0, array); // control bus out
 )
 
 (
-c = Bus(\control, 0, 2);
+c = Bus(\control, 0, 4);
 )
 
 // send coefficients
@@ -60,7 +60,7 @@ c = Bus(\control, 0, 2);
 r = {
 
     inf.do {
-    	c.getn(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+    	c.getn(4, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
     	0.01.wait; // 25 frames per second
     }
 

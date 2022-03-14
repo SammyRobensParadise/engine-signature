@@ -1,14 +1,15 @@
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import io from 'Socket.IO-client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ConnnectionStates, SocketMessage } from '../local';
 import ConnectionStatus from '../components/connection-status';
-import { Switch, Card, Alert } from 'ui-neumorphism';
+import { Switch, Card, Alert, Button, Chip } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
 import SoundBars from '../components/soundbars';
 import Detection from '../components/detections';
+import ErrorCountPieChart from '../components/error-count-pie-chart';
 
 /**
  * declare a websocket instance on server rendered code
@@ -32,20 +33,20 @@ const Home: NextPage = () => {
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
+  const startTime = useRef(Date.now());
 
   /**
    * Initializes the websocket to the server
    */
   const initiSocket = useCallback(async () => {
     let average: number[][] = [];
-    setInterval(() => {
-      console.log(Date.now());
-    }, 1000);
+
     await fetch('/api/socket');
     socket = io();
 
     socket.on('connect', () => {
       updateSocketStatus('LISTENING');
+      startTime.current = Date.now();
     });
     socket.on('disconnect', () => {
       updateSocketStatus('CLOSED');
@@ -119,6 +120,17 @@ const Home: NextPage = () => {
                 <p className='pt-2'>Connection:</p>
                 <span className='pt-2'>Off</span>{' '}
                 <Switch checked={socketOpen} onChange={togggleSocket} label='On' />
+                <div className='pt-2'>
+                  <Chip type='info'>
+                    <div className='w-44'>
+                      Uptime:{' '}
+                      <span className='w-24 font-semibold'>
+                        {(Date.now() - startTime.current) / 1000}
+                      </span>{' '}
+                      sec.
+                    </div>
+                  </Chip>
+                </div>
               </div>
             </Card>
             <Card className='px-4 py-2'>
@@ -134,6 +146,14 @@ const Home: NextPage = () => {
                     xmax={1000}
                   />
                 </div>
+                <Button
+                  depressed
+                  onClick={() => {
+                    setSamplingSize((state) => ({ ...state, x: 10 }));
+                  }}
+                >
+                  Reset
+                </Button>
               </div>
             </Card>
             <div>
@@ -157,8 +177,17 @@ const Home: NextPage = () => {
                     xstep={1}
                   />
                 </div>
+                <Button
+                  depressed
+                  onClick={() => {
+                    setSamplingSize((state) => ({ ...state, x: 50 }));
+                  }}
+                >
+                  Reset
+                </Button>
               </div>
             </Card>
+            <ErrorCountPieChart data={latestValues} threshold={errorThreshold.x / 100} />
           </div>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Output</h2>

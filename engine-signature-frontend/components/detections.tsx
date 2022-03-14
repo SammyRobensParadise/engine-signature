@@ -28,7 +28,7 @@ export default function Detection({ data, threshold = 0.9 }: SoundBarsInterface)
               );
             })
           ) : (
-            <p>No Input Detected</p>
+            <p>Waiting for Data</p>
           )}
         </div>
       </Card>

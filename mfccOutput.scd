@@ -28,6 +28,7 @@ x = {
 }.play;
 )
 
+
 c = Bus(\control, 0, 2);
 
 // send coefficients
@@ -35,7 +36,7 @@ c = Bus(\control, 0, 2);
 r = {
 
     inf.do {
-		c.getn(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+		c.get(2, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
 		0.01.wait; // 25 frames per second
     }
 
