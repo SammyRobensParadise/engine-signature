@@ -12,6 +12,7 @@ import Detection from '../components/detections';
 import ErrorCountPieChart from '../components/error-count-pie-chart';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
 import { average2D } from '../utils/utils';
+import RecordingStatus from '../components/recording-status';
 /**
  * declare a websocket instance on server rendered code
  */
@@ -171,7 +172,7 @@ const Home: NextPage = () => {
                     <div className='w-44'>
                       Socket Uptime:{' '}
                       <span className='w-24 font-semibold'>
-                        {(Date.now() - startTime.current) / 1000}
+                        {socketOpen ? (Date.now() - startTime.current) / 1000 : '0'}
                       </span>{' '}
                       sec.
                     </div>
@@ -186,7 +187,7 @@ const Home: NextPage = () => {
               <div className='flex space-x-4'>
                 <p className='pt-2 pr-2'>Record Input:</p>
                 <span className='pt-2'>Off</span>{' '}
-                <Switch checked={socketOpen} onChange={toggleListen} label='On' />
+                <Switch checked={recording} onChange={toggleRecording} label='On' />
               </div>
             </Card>
             <Card className='px-4 py-2'>
@@ -249,8 +250,10 @@ const Home: NextPage = () => {
             <h2 className='font-sans text-left text-xl'>Output</h2>
             <div className='flex space-x-4'>
               <p>Connection Status:</p>
-              <ConnectionStatus status={socketStatus} /> <p>OSC Port Status:</p>
+              <ConnectionStatus status={socketStatus} /> <p>OSC Port:</p>
               <ConnectionStatus status={listen ? 'LISTENING' : 'CLOSED'} />
+              <p>Recording:</p>
+              <RecordingStatus state={recording} />
             </div>
             <div className='flex space-x-4'>
               <p className='pt-2'>Output Magnitude:</p>
