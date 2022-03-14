@@ -40,7 +40,7 @@ export default function SoundBars({ data, threshold = 0.9 }: SoundBarsInterface)
         <ReferenceLine
           y={threshold}
           stroke='black'
-          label={`Threshold=${threshold}`}
+          label={`Error=${threshold}`}
           strokeWidth='5 5'
         />
       </BarChart>

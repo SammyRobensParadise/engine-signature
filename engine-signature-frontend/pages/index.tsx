@@ -30,7 +30,7 @@ const Home: NextPage = () => {
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
-  const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 0.5, y: 0 });
+  const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
 
   /**
@@ -38,7 +38,9 @@ const Home: NextPage = () => {
    */
   const initiSocket = useCallback(async () => {
     let average: number[][] = [];
-
+    setInterval(() => {
+      console.log(Date.now());
+    }, 1000);
     await fetch('/api/socket');
     socket = io();
 
@@ -105,7 +107,7 @@ const Home: NextPage = () => {
         <meta name='description' content='Engine Signature Detection' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <main>
+      <Card>
         <h1 className='font-sans text-center text-2xl p-4'>Engine Signature Detection</h1>
         <div className='grid grid-cols-2 gap-4 p-8'>
           <div className='p-4 space-y-4'>
@@ -119,7 +121,7 @@ const Home: NextPage = () => {
             </Card>
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
-                <p className='py-2'>Averaging Sample Size:</p>
+                <p className='py-2'>Moving Average Sample Size:</p>
                 <p className='py-2'>{samplingSize.x}</p>
                 <div className='pt-2'>
                   <Slider
@@ -142,15 +144,15 @@ const Home: NextPage = () => {
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
                 <p className='py-2'>Error Threshold</p>
-                <p className='py-2'>{errorThreshold.x}</p>
+                <p className='py-2 w-6'>{errorThreshold.x}%</p>
                 <div className='pt-2'>
                   <Slider
                     axis='x'
                     x={errorThreshold.x}
                     onChange={({ x }) => setErrorThreshold((state) => ({ ...state, x }))}
                     xmin={0}
-                    xmax={1}
-                    xstep={0.1}
+                    xmax={100}
+                    xstep={1}
                   />
                 </div>
               </div>
@@ -165,11 +167,11 @@ const Home: NextPage = () => {
             <div className='flex space-x-4'>
               <p className='pt-2'>Output Magnitude:</p>
             </div>
-            <SoundBars data={latestValues} threshold={errorThreshold.x} />
-            <Detection data={latestValues} threshold={errorThreshold.x} />
+            <SoundBars data={latestValues} threshold={errorThreshold.x / 100} />
+            <Detection data={latestValues} threshold={errorThreshold.x / 100} />
           </div>
         </div>
-      </main>
+      </Card>
     </div>
   );
 };
