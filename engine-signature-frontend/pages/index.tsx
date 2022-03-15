@@ -25,7 +25,7 @@ const Home: NextPage = () => {
   const [socketOpen, setSocketOpen] = useState(false);
   const [listen, setListen] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
+  const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 100, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
   const [waitingForRecordings, setWaitingForRecordings] = useState<boolean>(false);
@@ -158,21 +158,21 @@ const Home: NextPage = () => {
   }, [recording]);
 
   return (
-    <div className='bg-slate-100'>
+    <div className='bg-slate-100 min-h-screen'>
       <Head>
         <title>Engine Signature Version</title>
         <meta name='description' content='Engine Signature Detection' />
         <link rel='icon' href='/favicon.ico' />
       </Head>
-      <div className=' bg-slate-100 h-screen'>
+      <div className=' bg-slate-100 h-full'>
         <h1 className='font-sans text-center text-2xl p-4'>
           Engine Signature Detection Version 0.1.0
         </h1>
-        <div className='grid grid-cols-2 gap-4 p-8'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 p-8'>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Control Panel</h2>
             <Card className='px-4'>
-              <div className='flex space-x-4'>
+              <div className='flex space-x-4 flex-wrap'>
                 <p className='pt-2 pr-4'>Connection:</p>
                 <span className='pt-2'>Off</span>{' '}
                 <Switch checked={socketOpen} onChange={togggleSocket} label='On' />
@@ -188,19 +188,29 @@ const Home: NextPage = () => {
                   </Chip>
                 </div>
               </div>
-              <div className='flex space-x-4'>
+              <div className='flex space-x-4 flex-wrap'>
                 <p className='pt-2 pr-14'>Listen:</p>
                 <span className='pt-2'>Off</span>{' '}
-                <Switch checked={listen} onChange={toggleListen} label='On' />
+                <Switch
+                  checked={listen}
+                  onChange={toggleListen}
+                  label='On'
+                  disabled={!socketOpen}
+                />
               </div>
               <div className='flex space-x-4'>
                 <p className='pt-2 pr-2'>Record Input:</p>
                 <span className='pt-2'>Off</span>{' '}
-                <Switch checked={recording} onChange={toggleRecording} label='On' />
+                <Switch
+                  checked={recording}
+                  onChange={toggleRecording}
+                  label='On'
+                  disabled={!socketOpen}
+                />
               </div>
             </Card>
             <Card className='px-4 py-2'>
-              <div className='flex space-x-4'>
+              <div className='flex space-x-4 flex-wrap'>
                 <p className='py-2'>Moving Average Sample Size:</p>
                 <p className='py-2 w-6'>{samplingSize.x}</p>
                 <div className='pt-2'>
@@ -215,7 +225,7 @@ const Home: NextPage = () => {
                 <Button
                   depressed
                   onClick={() => {
-                    setSamplingSize((state) => ({ ...state, x: 10 }));
+                    setSamplingSize((state) => ({ ...state, x: 100 }));
                   }}
                 >
                   Reset
@@ -230,7 +240,7 @@ const Home: NextPage = () => {
               )}
             </div>
             <Card className='px-4 py-2'>
-              <div className='flex space-x-4'>
+              <div className='flex space-x-4 flex-wrap'>
                 <p className='py-2'>Error Threshold:</p>
                 <p className='py-2 w-8'>{errorThreshold.x}%</p>
                 <div className='pt-2'>
@@ -254,7 +264,7 @@ const Home: NextPage = () => {
               </div>
             </Card>
             <Card className='px-4 py-2'>
-              <div className='flex space-x-4'>
+              <div className='flex space-x-4 flex-wrap'>
                 {waitingForRecordings ? (
                   <div className='flex flex-grow'>
                     <p className='pr-4'>Generating...</p>
@@ -266,11 +276,11 @@ const Home: NextPage = () => {
                     />
                   </div>
                 ) : (
-                  <div className='space-x-4'>
-                    <Button depressed onClick={handleGetRecordedData}>
+                  <div className='space-x-4 flex-wrap'>
+                    <Button depressed onClick={handleGetRecordedData} disabled={!socketOpen}>
                       Get Recorded Data
                     </Button>
-                    <Button text onClick={handleClearRecordingData}>
+                    <Button text onClick={handleClearRecordingData} disabled={!socketOpen}>
                       Clear Recordings
                     </Button>
                   </div>
@@ -282,7 +292,7 @@ const Home: NextPage = () => {
           </div>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Output</h2>
-            <div className='flex space-x-4'>
+            <div className='flex space-x-4 flex-wrap'>
               <p>Connection Status:</p>
               <ConnectionStatus status={socketStatus} /> <p>OSC Port:</p>
               <ConnectionStatus status={listen ? 'LISTENING' : 'CLOSED'} />

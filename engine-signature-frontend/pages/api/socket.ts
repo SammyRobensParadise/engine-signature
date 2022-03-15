@@ -9,7 +9,7 @@ const {
 
 let threshold = 0.5;
 
-let samplingSize = 10;
+let samplingSize = 100;
 
 let average: number[][] = [];
 
