@@ -5,3 +5,9 @@ export type Message = { address: string; args: Array<{ type: string; value: numb
 export type SocketMessage = {
   message: Message;
 };
+export type ErrorValues = {
+  name: string;
+  value: number;
+};
+
+export type ErrorRecordings = { samples: ErrorValues[]; timestamp: number }[];

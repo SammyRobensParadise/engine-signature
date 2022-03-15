@@ -1,12 +1,7 @@
 import { Server } from 'socket.io';
 import * as osc from 'osc';
 import { average2D } from '../../utils/utils';
-import { Message } from '../../local';
-
-type ErrorValues = {
-  name: string;
-  value: number;
-};
+import { ErrorRecordings, ErrorValues, Message } from '../../local';
 
 let threshold = 0.5;
 
@@ -20,7 +15,7 @@ let listen = false;
 
 let initialTimestamp = 0;
 
-let errorRecordings: { samples: ErrorValues[]; timestamp: number }[] = [];
+let errorRecordings: ErrorRecordings = [];
 
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
@@ -136,6 +131,10 @@ const SocketHandler = (_req: unknown, res: any) => {
       });
       socket.on('close', () => {
         listen = false;
+      });
+
+      socket.on('get-recordigs', () => {
+        socket.emit('recordings', { message: errorRecordings });
       });
     });
   }

@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import io, { Socket } from 'Socket.IO-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ConnnectionStates, SocketMessage } from '../local';
+import { ConnnectionStates, ErrorRecordings, SocketMessage } from '../local';
 import ConnectionStatus from '../components/connection-status';
 import { Switch, Card, Alert, Button, Chip } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
@@ -55,6 +55,10 @@ const Home: NextPage = () => {
         setLatestValues(message.message);
       }
     });
+
+    socket.on('recordings', (message: ErrorRecordings) => {
+      console.log(message);
+    });
   }, [socketStatus]);
 
   /**
@@ -103,6 +107,12 @@ const Home: NextPage = () => {
       setRecording(false);
     } else {
       setRecording(true);
+    }
+  }
+
+  function handleGetRecordedData() {
+    if (socket) {
+      socket.emit('get-recordings', true);
     }
   }
 
@@ -231,6 +241,13 @@ const Home: NextPage = () => {
                   }}
                 >
                   Reset
+                </Button>
+              </div>
+            </Card>
+            <Card className='px-4 py-2'>
+              <div className='flex space-x-4'>
+                <Button depressed onClick={handleGetRecordedData}>
+                  Get Recorded Data
                 </Button>
               </div>
             </Card>
