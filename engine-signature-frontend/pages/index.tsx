@@ -2,17 +2,18 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import io, { Socket } from 'Socket.IO-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ConnnectionStates, ErrorRecordings, SocketMessage } from '../local';
+import { ConnnectionStates } from '../local';
 import ConnectionStatus from '../components/connection-status';
-import { Switch, Card, Alert, Button, Chip } from 'ui-neumorphism';
+import { Switch, Card, Alert, Button, Chip, ProgressLinear } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
 import SoundBars from '../components/soundbars';
 import Detection from '../components/detections';
 import ErrorCountPieChart from '../components/error-count-pie-chart';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
-import { average2D } from '../utils/utils';
 import RecordingStatus from '../components/recording-status';
+import { CSVDownload } from 'react-csv';
+
 /**
  * declare a websocket instance on server rendered code
  */
@@ -27,14 +28,14 @@ const Home: NextPage = () => {
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
+  const [waitingForRecordings, setWaitingForRecordings] = useState<boolean>(false);
+  const [csv, setCsv] = useState<string>('');
   const startTime = useRef(Date.now());
 
   /**
    * Initializes the websocket to the server
    */
   const initiSocket = useCallback(async () => {
-    let average: number[][] = [];
-
     await fetch('/api/socket');
     socket = io();
 
@@ -56,8 +57,9 @@ const Home: NextPage = () => {
       }
     });
 
-    socket.on('recordings', (message: string) => {
-      console.log(message);
+    socket.on('recordings', (message: { message: string }) => {
+      setWaitingForRecordings(false);
+      setCsv(message.message);
     });
   }, [socketStatus]);
 
@@ -112,6 +114,7 @@ const Home: NextPage = () => {
 
   function handleGetRecordedData() {
     if (socket) {
+      setWaitingForRecordings(true);
       socket.emit('get-recordings', true);
     }
   }
@@ -246,9 +249,22 @@ const Home: NextPage = () => {
             </Card>
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
-                <Button depressed onClick={handleGetRecordedData}>
-                  Get Recorded Data
-                </Button>
+                {waitingForRecordings ? (
+                  <div className='flex flex-grow'>
+                    <p className='pr-4'>Generating...</p>
+                    <ProgressLinear
+                      height={30}
+                      style={{ width: '100%' }}
+                      indeterminate
+                      color='var(--primary)'
+                    />
+                  </div>
+                ) : (
+                  <Button depressed onClick={handleGetRecordedData}>
+                    Get Recorded Data
+                  </Button>
+                )}
+                {csv != '' && <CSVDownload data={csv} target='_blank' />}
               </div>
             </Card>
             <ErrorCountPieChart data={latestValues} threshold={errorThreshold.x / 100} />

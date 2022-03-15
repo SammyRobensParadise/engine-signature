@@ -82,26 +82,27 @@ const SocketHandler = (_req: unknown, res: any) => {
           average.push(samples);
           if (average.length >= samplingSize) {
             const averages = average2D(average);
+
             socket.emit('osc', { message: averages });
-            average = [];
-          }
-          /**
-           * record each data point
-           */
-          if (recordData) {
-            if (!errorRecordings.length) {
-              initialTimestamp = Date.now();
+            /**
+             * record each data point
+             */
+            if (recordData) {
+              if (!errorRecordings.length) {
+                initialTimestamp = Date.now();
+              }
+              const errorValues: ErrorValues[] = averages
+                .map((sample, index): { name: string; value: number } => ({
+                  name: `Feature-${index + 1}`,
+                  value: sample,
+                }))
+                .filter((sample) => sample.value >= threshold);
+              errorRecordings.push({
+                samples: errorValues,
+                timestamp: Date.now() - initialTimestamp,
+              });
             }
-            const errorValues: ErrorValues[] = samples
-              .map((sample, index): { name: string; value: number } => ({
-                name: `Feature-${index + 1}`,
-                value: sample,
-              }))
-              .filter((sample) => sample.value >= threshold);
-            errorRecordings.push({
-              samples: errorValues,
-              timestamp: Date.now() - initialTimestamp,
-            });
+            average = [];
           }
         }
       });
@@ -142,7 +143,7 @@ const SocketHandler = (_req: unknown, res: any) => {
         const transforms = [unwind({ paths: ['samples', 'samples.samples'] })];
         const json2csvParser = new Parser({ fields, transforms });
         const csv = json2csvParser.parse(errorRecordings);
-        socket.emit('recordigns', { message: csv });
+        socket.emit('recordings', { message: csv });
       });
     });
   }
