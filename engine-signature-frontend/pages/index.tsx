@@ -2,73 +2,66 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import io, { Socket } from 'Socket.IO-client';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ConnnectionStates, SocketMessage } from '../local';
+import { ConnnectionStates } from '../local';
 import ConnectionStatus from '../components/connection-status';
-import { Switch, Card, Alert, Button, Chip } from 'ui-neumorphism';
+import { Switch, Card, Alert, Button, Chip, ProgressLinear } from 'ui-neumorphism';
 import Slider from 'react-input-slider';
 import 'ui-neumorphism/dist/index.css';
 import SoundBars from '../components/soundbars';
 import Detection from '../components/detections';
 import ErrorCountPieChart from '../components/error-count-pie-chart';
 import { DefaultEventsMap } from '@socket.io/component-emitter';
+import RecordingStatus from '../components/recording-status';
+import { CSVDownload } from 'react-csv';
 
 /**
  * declare a websocket instance on server rendered code
  */
 let socket: Socket<DefaultEventsMap, DefaultEventsMap>;
 
-function average2D(array: number[][]): number[] {
-  let result: number[] = new Array(array[0].length).fill(0);
-  array.forEach((dataPoint) => {
-    dataPoint.forEach((value, index) => {
-      result[index] = result[index] + Math.abs(value);
-    });
-  });
-  return result.map((sum) => sum / array.length);
-}
-
 const Home: NextPage = () => {
   const [latestValues, setLatestValues] = useState<number[]>([]);
   const [socketStatus, updateSocketStatus] = useState<ConnnectionStates>('CLOSED');
   const [socketOpen, setSocketOpen] = useState(false);
+  const [listen, setListen] = useState(false);
+  const [recording, setRecording] = useState(false);
   const [samplingSize, setSamplingSize] = useState<{ x: number; y: number }>({ x: 10, y: 0 });
   const [errorThreshold, setErrorThreshold] = useState<{ x: number; y: number }>({ x: 50, y: 0 });
   const [showPerformaceWarning, setShowPerformanceWarning] = useState<boolean>(false);
+  const [waitingForRecordings, setWaitingForRecordings] = useState<boolean>(false);
+  const [csv, setCsv] = useState<string>('');
   const startTime = useRef(Date.now());
 
   /**
    * Initializes the websocket to the server
    */
   const initiSocket = useCallback(async () => {
-    let average: number[][] = [];
-
     await fetch('/api/socket');
     socket = io();
 
     socket.on('connect', () => {
-      updateSocketStatus('LISTENING');
+      updateSocketStatus('OPEN');
       startTime.current = Date.now();
     });
     socket.on('disconnect', () => {
       updateSocketStatus('CLOSED');
     });
 
-    socket.on('osc', (message: SocketMessage) => {
+    socket.on('error', () => {
+      updateSocketStatus('ERROR');
+    });
+
+    socket.on('osc', (message: { message: number[] }) => {
       if (socketStatus !== 'CLOSED' && socketStatus !== 'ERROR') {
-        const { args } = message.message;
-        const e: number[] = new Array(args.length);
-        args.forEach((arg, index) => {
-          e[index] = arg.value;
-        });
-        average.push(e);
-        if (average.length >= samplingSize.x) {
-          const averages = average2D(average);
-          setLatestValues(averages);
-          average = [];
-        }
+        setLatestValues(message.message);
       }
     });
-  }, [socketStatus, samplingSize]);
+
+    socket.on('recordings', (message: { message: string }) => {
+      setWaitingForRecordings(false);
+      setCsv(message.message);
+    });
+  }, [socketStatus]);
 
   /**
    * Side Effect Hook to handle the websocket connection
@@ -103,8 +96,69 @@ const Home: NextPage = () => {
     }
   }
 
+  function toggleListen() {
+    if (listen) {
+      setListen(false);
+    } else {
+      setListen(true);
+    }
+  }
+
+  function toggleRecording() {
+    if (recording) {
+      setRecording(false);
+    } else {
+      setRecording(true);
+    }
+  }
+
+  function handleGetRecordedData() {
+    if (socket) {
+      setWaitingForRecordings(true);
+      socket.emit('get-recordings', true);
+    }
+  }
+
+  function handleClearRecordingData() {
+    if (socket) {
+      socket.emit('clear-recordings', true);
+    }
+  }
+
+  useEffect(() => {
+    if (socket) {
+      socket.emit('threshold', errorThreshold);
+    }
+  }, [errorThreshold]);
+
+  useEffect(() => {
+    if (samplingSize.x && socket) {
+      socket.emit('size', samplingSize.x);
+    }
+  }, [samplingSize.x]);
+
+  useEffect(() => {
+    if (socket) {
+      if (listen) {
+        socket.emit('listen', true);
+      } else {
+        socket.emit('close', true);
+      }
+    }
+  }, [listen]);
+
+  useEffect(() => {
+    if (socket) {
+      if (recording) {
+        socket.emit('record', true);
+      } else {
+        socket.emit('stop-recording', true);
+      }
+    }
+  }, [recording]);
+
   return (
-    <div>
+    <div className='bg-slate-100'>
       <Head>
         <title>Engine Signature Version</title>
         <meta name='description' content='Engine Signature Detection' />
@@ -119,20 +173,30 @@ const Home: NextPage = () => {
             <h2 className='font-sans text-left text-xl'>Control Panel</h2>
             <Card className='px-4'>
               <div className='flex space-x-4'>
-                <p className='pt-2'>Connection:</p>
+                <p className='pt-2 pr-4'>Connection:</p>
                 <span className='pt-2'>Off</span>{' '}
                 <Switch checked={socketOpen} onChange={togggleSocket} label='On' />
                 <div className='pt-2'>
                   <Chip type='info'>
                     <div className='w-44'>
-                      Uptime:{' '}
+                      Socket Uptime:{' '}
                       <span className='w-24 font-semibold'>
-                        {(Date.now() - startTime.current) / 1000}
+                        {socketOpen ? (Date.now() - startTime.current) / 1000 : '0'}
                       </span>{' '}
                       sec.
                     </div>
                   </Chip>
                 </div>
+              </div>
+              <div className='flex space-x-4'>
+                <p className='pt-2 pr-14'>Listen:</p>
+                <span className='pt-2'>Off</span>{' '}
+                <Switch checked={listen} onChange={toggleListen} label='On' />
+              </div>
+              <div className='flex space-x-4'>
+                <p className='pt-2 pr-2'>Record Input:</p>
+                <span className='pt-2'>Off</span>{' '}
+                <Switch checked={recording} onChange={toggleRecording} label='On' />
               </div>
             </Card>
             <Card className='px-4 py-2'>
@@ -167,7 +231,7 @@ const Home: NextPage = () => {
             </div>
             <Card className='px-4 py-2'>
               <div className='flex space-x-4'>
-                <p className='py-2'>Error Threshold</p>
+                <p className='py-2'>Error Threshold:</p>
                 <p className='py-2 w-8'>{errorThreshold.x}%</p>
                 <div className='pt-2'>
                   <Slider
@@ -189,13 +253,41 @@ const Home: NextPage = () => {
                 </Button>
               </div>
             </Card>
+            <Card className='px-4 py-2'>
+              <div className='flex space-x-4'>
+                {waitingForRecordings ? (
+                  <div className='flex flex-grow'>
+                    <p className='pr-4'>Generating...</p>
+                    <ProgressLinear
+                      height={30}
+                      style={{ width: '100%' }}
+                      indeterminate
+                      color='var(--primary)'
+                    />
+                  </div>
+                ) : (
+                  <div className='space-x-4'>
+                    <Button depressed onClick={handleGetRecordedData}>
+                      Get Recorded Data
+                    </Button>
+                    <Button text onClick={handleClearRecordingData}>
+                      Clear Recordings
+                    </Button>
+                  </div>
+                )}
+                {csv != '' && <CSVDownload data={csv} target='_blank' />}
+              </div>
+            </Card>
             <ErrorCountPieChart data={latestValues} threshold={errorThreshold.x / 100} />
           </div>
           <div className='p-4 space-y-4'>
             <h2 className='font-sans text-left text-xl'>Output</h2>
             <div className='flex space-x-4'>
               <p>Connection Status:</p>
-              <ConnectionStatus status={socketStatus} />
+              <ConnectionStatus status={socketStatus} /> <p>OSC Port:</p>
+              <ConnectionStatus status={listen ? 'LISTENING' : 'CLOSED'} />
+              <p>Recording:</p>
+              <RecordingStatus state={recording} />
             </div>
             <div className='flex space-x-4'>
               <p className='pt-2'>Output Magnitude:</p>
