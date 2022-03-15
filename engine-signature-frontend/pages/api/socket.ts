@@ -3,6 +3,11 @@ import * as osc from 'osc';
 import { average2D } from '../../utils/utils';
 import { Message } from '../../local';
 
+type ErrorValues = {
+  name: string;
+  value: number;
+};
+
 let threshold = 0.5;
 
 let samplingSize = 10;
@@ -12,6 +17,10 @@ let average: number[][] = [];
 let recordData = false;
 
 let listen = false;
+
+let initialTimestamp = 0;
+
+let errorRecordings: { samples: ErrorValues[]; timestamp: number }[] = [];
 
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
@@ -67,11 +76,11 @@ const SocketHandler = (_req: unknown, res: any) => {
            * via the websocket
            */
           const { args } = oscMessage;
-          const e: number[] = new Array(args.length);
+          const samples: number[] = new Array(args.length);
           args.forEach((arg, index) => {
-            e[index] = arg.value;
+            samples[index] = arg.value;
           });
-          average.push(e);
+          average.push(samples);
           if (average.length >= samplingSize) {
             const averages = average2D(average);
             socket.emit('osc', { message: averages });
@@ -81,6 +90,19 @@ const SocketHandler = (_req: unknown, res: any) => {
            * record each data point
            */
           if (recordData) {
+            if (!errorRecordings.length) {
+              initialTimestamp = Date.now();
+            }
+            const errorValues: ErrorValues[] = samples
+              .map((sample, index): { name: string; value: number } => ({
+                name: `Feature-${index + 1}`,
+                value: sample,
+              }))
+              .filter((sample) => sample.value >= threshold);
+            errorRecordings.push({
+              samples: errorValues,
+              timestamp: Date.now() - initialTimestamp,
+            });
           }
         }
       });
