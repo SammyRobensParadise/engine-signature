@@ -1,6 +1,7 @@
 import { Server } from 'socket.io';
 import * as osc from 'osc';
 import { average2D } from '../../utils/utils';
+import { Message } from '../../local';
 
 let threshold = 0.5;
 
@@ -16,7 +17,7 @@ const udpPort = new osc.UDPPort({
   metadata: true,
 });
 
-const getIPAddresses = function () {
+const getIPAddresses = (): string[] => {
   var os = require('os'),
     interfaces = os.networkInterfaces(),
     ipAddresses = [];
@@ -30,7 +31,6 @@ const getIPAddresses = function () {
       }
     }
   }
-
   return ipAddresses;
 };
 
@@ -44,14 +44,18 @@ const SocketHandler = (_req: unknown, res: any) => {
     io.on('connection', (socket) => {
       console.log('connected');
       udpPort.on('ready', () => {
-        var ipAddresses = getIPAddresses();
+        const ipAddresses = getIPAddresses();
         console.log('Listening for OSC over UDP.');
         ipAddresses.forEach(function (address) {
           console.log(' Host:', address + ', Port:', udpPort.options.localPort);
         });
       });
-      udpPort.on('message', function (oscMessage: any) {
+
+      udpPort.on('message', function (oscMessage: Message) {
         socket.emit('osc', { message: oscMessage });
+        if (recordData) {
+          console.log('record Data...');
+        }
       });
 
       udpPort.on('error', function (err: Error) {
