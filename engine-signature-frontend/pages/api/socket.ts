@@ -2,6 +2,10 @@ import { Server } from 'socket.io';
 import * as osc from 'osc';
 import { average2D } from '../../utils/utils';
 import { ErrorRecordings, ErrorValues, Message } from '../../local';
+const {
+  Parser,
+  transforms: { unwind },
+} = require('json2csv');
 
 let threshold = 0.5;
 
@@ -133,8 +137,12 @@ const SocketHandler = (_req: unknown, res: any) => {
         listen = false;
       });
 
-      socket.on('get-recordigs', () => {
-        socket.emit('recordings', { message: errorRecordings });
+      socket.on('get-recordings', () => {
+        const fields = ['timestamp', 'samples.name', 'samples.value'];
+        const transforms = [unwind({ paths: ['samples', 'samples.samples'] })];
+        const json2csvParser = new Parser({ fields, transforms });
+        const csv = json2csvParser.parse(errorRecordings);
+        socket.emit('recordigns', { message: csv });
       });
     });
   }

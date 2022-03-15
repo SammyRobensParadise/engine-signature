@@ -56,7 +56,7 @@ const Home: NextPage = () => {
       }
     });
 
-    socket.on('recordings', (message: ErrorRecordings) => {
+    socket.on('recordings', (message: string) => {
       console.log(message);
     });
   }, [socketStatus]);
