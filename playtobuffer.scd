@@ -27,12 +27,11 @@ c.postln;
 // e = Buffer.read(s, b[2]);
 // d = c[3]
 (
-~class = "C";
+~class = "A";
 d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "_Concat.wav");
 )
 
 
-{ HPF.ar(in: d,freq: 440.0, mul: 1.0, add: 0.0) }.play
 // now play it
 // replace c[2] with c[i] for desired sound from list of buffers
 (
@@ -50,10 +49,12 @@ Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
 (
 x = {
 var in, fft, array;
-in = PlayBuf.ar(1, d, BufRateScale.kr(d), loop: 1);
-fft = FFT(LocalBuf(1024), in); // for sampling rates 44100 and 48000
+in = PlayBuf.ar(2, d, BufRateScale.kr(d), loop: 2);
+in = HPF.ar(in, freq:448, mul: 1.0, add: 0.0);
+
+/*fft = FFT(LocalBuf(1024), in); // for sampling rates 44100 and 48000
 array = MFCC.kr(fft);
-Out.kr(0, array); // control bus out
+Out.kr(0, array); // control bus out*/
 }.play;
 )
 
