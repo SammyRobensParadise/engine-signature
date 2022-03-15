@@ -137,6 +137,9 @@ const SocketHandler = (_req: unknown, res: any) => {
       socket.on('close', () => {
         listen = false;
       });
+      socket.on('clear-recordings', () => {
+        errorRecordings = [];
+      });
 
       socket.on('get-recordings', () => {
         const fields = ['timestamp', 'samples.name', 'samples.value'];

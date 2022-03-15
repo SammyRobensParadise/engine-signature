@@ -119,6 +119,12 @@ const Home: NextPage = () => {
     }
   }
 
+  function handleClearRecordingData() {
+    if (socket) {
+      socket.emit('clear-recordings', true);
+    }
+  }
+
   useEffect(() => {
     if (socket) {
       socket.emit('threshold', errorThreshold);
@@ -260,9 +266,14 @@ const Home: NextPage = () => {
                     />
                   </div>
                 ) : (
-                  <Button depressed onClick={handleGetRecordedData}>
-                    Get Recorded Data
-                  </Button>
+                  <div className='space-x-4'>
+                    <Button depressed onClick={handleGetRecordedData}>
+                      Get Recorded Data
+                    </Button>
+                    <Button text onClick={handleClearRecordingData}>
+                      Clear Recordings
+                    </Button>
+                  </div>
                 )}
                 {csv != '' && <CSVDownload data={csv} target='_blank' />}
               </div>
