@@ -41,6 +41,13 @@ const Home: NextPage = () => {
 
     socket.on('connect', () => {
       updateSocketStatus('OPEN');
+      if (errorThreshold.x) {
+        socket.emit('threshold', errorThreshold.x);
+      }
+      if (samplingSize.x) {
+        socket.emit('size', samplingSize.x);
+      }
+
       startTime.current = Date.now();
     });
     socket.on('disconnect', () => {
@@ -61,7 +68,7 @@ const Home: NextPage = () => {
       setWaitingForRecordings(false);
       setCsv(message.message);
     });
-  }, [socketStatus]);
+  }, [errorThreshold.x, samplingSize.x, socketStatus]);
 
   /**
    * Side Effect Hook to handle the websocket connection
@@ -120,16 +127,17 @@ const Home: NextPage = () => {
   }
 
   function handleClearRecordingData() {
+    setCsv('');
     if (socket) {
       socket.emit('clear-recordings', true);
     }
   }
 
   useEffect(() => {
-    if (socket) {
-      socket.emit('threshold', errorThreshold);
+    if (socket && errorThreshold.x) {
+      socket.emit('threshold', errorThreshold.x);
     }
-  }, [errorThreshold]);
+  }, [errorThreshold.x]);
 
   useEffect(() => {
     if (samplingSize.x && socket) {
