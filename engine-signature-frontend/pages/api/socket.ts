@@ -11,6 +11,8 @@ let average: number[][] = [];
 
 let recordData = false;
 
+let listen = false;
+
 const udpPort = new osc.UDPPort({
   localAddress: 'localhost',
   localPort: 12000,
@@ -39,22 +41,47 @@ const SocketHandler = (_req: unknown, res: any) => {
     console.log('Socket is already running');
   } else {
     console.log('Socket is initializing...');
+
     const io = new Server(res.socket.server);
+
     res.socket.server.io = io;
+
     io.on('connection', (socket) => {
       console.log('connected');
+
       udpPort.on('ready', () => {
         const ipAddresses = getIPAddresses();
         console.log('Listening for OSC over UDP.');
-        ipAddresses.forEach(function (address) {
+        ipAddresses.forEach((address) => {
           console.log(' Host:', address + ', Port:', udpPort.options.localPort);
         });
       });
 
       udpPort.on('message', function (oscMessage: Message) {
-        socket.emit('osc', { message: oscMessage });
-        if (recordData) {
-          console.log('record Data...');
+        /**
+         * only do the following if we should be listening to the UDP Socket
+         */
+        if (listen) {
+          /**
+           * get the moving average values and send them to the frontend
+           * via the websocket
+           */
+          const { args } = oscMessage;
+          const e: number[] = new Array(args.length);
+          args.forEach((arg, index) => {
+            e[index] = arg.value;
+          });
+          average.push(e);
+          if (average.length >= samplingSize) {
+            const averages = average2D(average);
+            socket.emit('osc', { message: averages });
+            average = [];
+          }
+          /**
+           * record each data point
+           */
+          if (recordData) {
+          }
         }
       });
 
@@ -75,6 +102,7 @@ const SocketHandler = (_req: unknown, res: any) => {
       });
 
       socket.on('listen', () => {
+        listen = true;
         udpPort.open();
       });
 
@@ -84,8 +112,8 @@ const SocketHandler = (_req: unknown, res: any) => {
       socket.on('stop-recording', () => {
         recordData = false;
       });
-      socket.on('stop', () => {
-        udpPort.close();
+      socket.on('close', () => {
+        listen = false;
       });
     });
   }

@@ -50,22 +50,12 @@ const Home: NextPage = () => {
       updateSocketStatus('ERROR');
     });
 
-    socket.on('osc', (message: SocketMessage) => {
+    socket.on('osc', (message: { message: number[] }) => {
       if (socketStatus !== 'CLOSED' && socketStatus !== 'ERROR') {
-        const { args } = message.message;
-        const e: number[] = new Array(args.length);
-        args.forEach((arg, index) => {
-          e[index] = arg.value;
-        });
-        average.push(e);
-        if (average.length >= samplingSize.x) {
-          const averages = average2D(average);
-          setLatestValues(averages);
-          average = [];
-        }
+        setLatestValues(message.message);
       }
     });
-  }, [socketStatus, samplingSize]);
+  }, [socketStatus]);
 
   /**
    * Side Effect Hook to handle the websocket connection
@@ -149,7 +139,7 @@ const Home: NextPage = () => {
   }, [recording]);
 
   return (
-    <div>
+    <div className='bg-slate-100'>
       <Head>
         <title>Engine Signature Version</title>
         <meta name='description' content='Engine Signature Detection' />
