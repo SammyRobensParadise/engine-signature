@@ -9,7 +9,7 @@ const {
 
 let threshold = 0.5;
 
-let samplingSize = 10;
+let samplingSize = 100;
 
 let average: number[][] = [];
 
@@ -117,10 +117,12 @@ const SocketHandler = (_req: unknown, res: any) => {
 
       socket.on('threshold', (args: number) => {
         threshold = args / 100;
+        console.log('Threshold Updated: ', threshold);
       });
 
       socket.on('size', (args: number) => {
         samplingSize = args;
+        console.log('Sampling Size Updated', samplingSize);
       });
 
       socket.on('listen', () => {

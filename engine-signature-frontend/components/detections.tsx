@@ -23,7 +23,14 @@ export default function Detection({ data, threshold = 0.9 }: SoundBarsInterface)
                   border='bottom'
                   flat={!hasError}
                 >
-                  {source.name}
+                  <div className='flex space-x-4'>
+                    <div
+                      className={`w-4 h-4 rounded-full ${
+                        hasError ? 'bg-red-600 animate-ping' : ''
+                      }`}
+                    />
+                    <div>{source.name}</div>
+                  </div>
                 </Alert>
               );
             })

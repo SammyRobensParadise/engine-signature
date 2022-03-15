@@ -20,3 +20,42 @@ a {
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.emerg-shutoff {
+  -webkit-animation-name: animation;
+  -webkit-animation-duration: 0.5s;
+  -webkit-animation-timing-function: ease-in-out;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-play-state: running;
+
+  animation-name: animation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  background-color: #f00;
+}
+
+@-webkit-keyframes animation {
+  0% {
+    background-color: red;
+  }
+  50.0% {
+    background-color: #ffa500;
+  }
+  100.0% {
+    background-color: red;
+  }
+}
+
+@keyframes animation {
+  0% {
+    background-color: red;
+  }
+  50.0% {
+    background-color: #ffa500;
+  }
+  100.0% {
+    background-color: red;
+  }
+}
