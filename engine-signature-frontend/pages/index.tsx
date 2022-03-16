@@ -170,7 +170,8 @@ const Home: NextPage = () => {
   }, [recording]);
 
   useEffect(() => {
-    if (latestValues.length && latestValues.filter((v) => v > errorThreshold.x).length) {
+    const hasErrors = latestValues.filter((v) => v > errorThreshold.x / 100).length;
+    if (latestValues.length && hasErrors) {
       setShowShutdownMessage(true);
     }
   }, [errorThreshold.x, latestValues]);
