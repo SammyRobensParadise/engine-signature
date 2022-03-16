@@ -8,7 +8,7 @@ s.boot;
 
 /\*(
 
-~class = "C";
+~class = "A";
 //Let a be the number of samples of a type
 a = ['01','02','03','04','05','06', '07', '08', '09', '10'];
 
@@ -27,7 +27,8 @@ c.postln;
 // e = Buffer.read(s, b[2]);
 // d = c[3]
 (
-~class = "C";
+~class = "A";
+
 d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "\_Concat.wav");
 )
 
