@@ -28,7 +28,6 @@ c.postln;
 // d = c[3]
 (
 ~class = "A";
-
 d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "\_Concat.wav");
 )
 
