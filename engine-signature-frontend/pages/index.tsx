@@ -170,10 +170,10 @@ const Home: NextPage = () => {
   }, [recording]);
 
   useEffect(() => {
-    if (latestValues.length) {
+    if (latestValues.length && latestValues.filter((v) => v > errorThreshold.x).length) {
       setShowShutdownMessage(true);
     }
-  }, [latestValues.length]);
+  }, [errorThreshold.x, latestValues]);
 
   return (
     <div className='bg-slate-100 min-h-screen'>
