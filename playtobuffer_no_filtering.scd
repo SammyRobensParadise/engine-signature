@@ -29,7 +29,7 @@ c.postln;
 (
 ~class = "A";
 
-d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "\_Concat.wav");
+d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "\_Concat.wav");
 )
 
 { HPF.ar(in: d,freq: 440.0, mul: 1.0, add: 0.0) }.play
