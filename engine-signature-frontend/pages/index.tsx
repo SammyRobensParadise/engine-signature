@@ -107,6 +107,14 @@ const Home: NextPage = () => {
     }
   }
 
+  useEffect(() => {
+    return () => {
+      if (socket) {
+        socket.emit('end');
+      }
+    };
+  }, []);
+
   function toggleListen() {
     if (listen) {
       setListen(false);
