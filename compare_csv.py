@@ -3,33 +3,28 @@ import csv
 import numpy as np
 
 def extract_rows(file="Real World Failure-300-5.csv"):
-    
     file = open(file)
     csvreader = csv.reader(file)
-    
     rows = []
+    
     for row in csvreader:
-        
         next = row
         if len(row) == 1:
             next = row[0].split(" ")
-
         rows.append(next)
+        
     return rows
 
 def find_intervals(rows, include_delays):
     return find_intervals_with_delays(rows) if include_delays else find_intervals_no_delays(rows)
 
-### intervals EXCLUDING Delays ###
 def find_intervals_no_delays(rows):
     intervals = []
-    beg= 0
-    end = 0
     new_interval = [0,0,""]
+    
     for row in rows:
         cl = row[2]
         t_milli = float(row[1])*1000
-        
         
         if cl != "Delay":
             new_interval[0] = t_milli
@@ -40,15 +35,13 @@ def find_intervals_no_delays(rows):
         if new_interval[0] > 0 and new_interval[0] < new_interval[1]:
             intervals.append(new_interval)
             new_interval = [0,0, ""]
+            
     return intervals
 
-
-### Intervals INCLUDING Delays ###
 def find_intervals_with_delays(rows):
     intervals = []
-    beg= 0
-    end = 0
     new_interval = [0,0,""]
+    
     for row in rows:
         cl = row[2]
         t_milli = float(row[1])*1000
@@ -66,7 +59,6 @@ def find_intervals_with_delays(rows):
     return intervals
        
 def match_intervals(intervals, rows):
-    i = 0
     grouped_intervals = []
     for interval in intervals:
         x = {"prediction": interval[2]}
@@ -122,7 +114,9 @@ def calculate_accuracy(grouped_intervals, include_delays):
         
         if include_delays and prediction == "Delay":
             accuracy = 1 if len(data) == 0 else 0
+            
         accuracies.append(accuracy)
+        
     return accuracies
             
         
@@ -136,15 +130,8 @@ if  __name__ ==  "__main__":
     data = extract_rows(experimental_data_csv)
     
     intervals = find_intervals(gt, include_delays)
-    # print(intervals)
     grouped_intervals = match_intervals(intervals, data)
     
     x = calculate_accuracy(grouped_intervals, include_delays)
     x = np.mean(x)
     print(x)
-
-
-# print(gt[398])
-
-
-# %%
