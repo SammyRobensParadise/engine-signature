@@ -166,11 +166,13 @@ def calculate_accuracy(grouped_intervals, include_delays):
         
     return accuracies, true_count, total_count, predicted, actual
 
-def display_results(true_count, total_count):
+def display_results(true_count, total_count, include_delays):
     for i in true_count:
         accuracy = 0
         if total_count[i] != 0:
             accuracy = true_count[i] / total_count[i]
+        if not(include_delays) and i == "Delay":
+            continue
         print(f'Class: {i}  Accuracy: {accuracy}')
 
     
@@ -179,7 +181,7 @@ if  __name__ ==  "__main__":
     ground_truth_csv = 'Real World Failure-300-5.csv'
     experimental_data_csv = 'REAL_5.csv'
     
-    include_delays = True
+    include_delays = False
     
     gt = extract_rows(ground_truth_csv) 
     data = extract_rows(experimental_data_csv)
@@ -189,6 +191,7 @@ if  __name__ ==  "__main__":
     
     x,true_count,total_count, predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
     x = np.mean(x)
+    
     print(x) # Average of averages foreach interval
     # print(true_count)
     # print(total_count)
@@ -196,11 +199,12 @@ if  __name__ ==  "__main__":
     # print(predicted)
     # print(actual)
     
-    display_results(true_count, total_count)
+    print("***** ACCURACIES ******")
+    display_results(true_count, total_count, include_delays)
+    
+    print("**** CONFUSION MATRIX ****")
     print(metrics.confusion_matrix(actual, predicted))
 
     # Print the precision and recall, among other metrics
     print(metrics.classification_report(actual, predicted, digits=3))
     
-
-# %%
