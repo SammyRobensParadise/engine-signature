@@ -208,5 +208,3 @@ if  __name__ ==  "__main__":
     # Print the precision and recall, among other metrics
     print(metrics.classification_report(actual, predicted, digits=3))
     
-
-# %%
