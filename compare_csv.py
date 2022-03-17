@@ -17,6 +17,7 @@ def extract_rows(file="Real World Failure-300-5.csv"):
         rows.append(next)
     return rows
 
+### intervals EXCLUDING Delays ###
 # def find_intervals(rows):
 #     intervals = []
 #     beg= 0
@@ -38,6 +39,8 @@ def extract_rows(file="Real World Failure-300-5.csv"):
 #             new_interval = [0,0, ""]
 #     return intervals
 
+
+### Intervals INCLUDING Delays ###
 def find_intervals(rows):
     intervals = []
     beg= 0
