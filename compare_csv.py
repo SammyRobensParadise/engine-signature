@@ -1,6 +1,7 @@
 #%%
 import csv
 import numpy as np
+from sklearn import metrics
 
 def extract_rows(file="Real World Failure-300-5.csv"):
     file = open(file)
@@ -104,6 +105,13 @@ def calculate_accuracy(grouped_intervals, include_delays):
     true_count["D"] = 0
     true_count["Delay"] = 0
     
+    false_pos_count = {}
+    false_pos_count["A"] = 0
+    false_pos_count["B"] = 0
+    false_pos_count["C"] = 0
+    false_pos_count["D"] = 0
+    false_pos_count["Delay"] = 0
+    
     
     total_count = {}
     total_count["A"] = 0
@@ -112,6 +120,8 @@ def calculate_accuracy(grouped_intervals, include_delays):
     total_count["D"] = 0
     total_count["Delay"] = 0
     
+    predicted = []
+    actual = []
     
     for interval in grouped_intervals:
         correct = 0
@@ -123,22 +133,38 @@ def calculate_accuracy(grouped_intervals, include_delays):
         for d in data:
             if feature_map[d[1]] == prediction:
                 correct += 1
+            
+            
+            predicted.append(feature_map[d[1]])
+            actual.append(prediction)
+            # else:
+                
             total += 1
         
         if total != 0:
             accuracy = correct / total
         
         if include_delays and prediction == "Delay":
-            accuracy = 1 if len(data) == 0 else 0
-            correct = 1
-            total = 1
+            if len(data) == 0:
+                accuracy = 1
+                correct = 1
+                total = 1
+                predicted.append("Delay")
+                
+                
+            else:
+                accuracy = 0
+                
+                predicted.append(feature_map[d[1]])
+            
+            actual.append("Delay")
             
         true_count[prediction] += correct
         total_count[prediction] += total
         
         accuracies.append(accuracy)
         
-    return accuracies, true_count, total_count
+    return accuracies, true_count, total_count, predicted, actual
 
 def display_results(true_count, total_count):
     for i in true_count:
@@ -161,14 +187,20 @@ if  __name__ ==  "__main__":
     intervals = find_intervals(gt, include_delays)
     grouped_intervals = match_intervals(intervals, data)
     
-    x,true_count,total_count = calculate_accuracy(grouped_intervals, include_delays)
+    x,true_count,total_count, predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
     x = np.mean(x)
     print(x) # Average of averages foreach interval
-    print(true_count)
-    print(total_count)
+    # print(true_count)
+    # print(total_count)
+    
+    # print(predicted)
+    # print(actual)
     
     display_results(true_count, total_count)
-    
+    print(metrics.confusion_matrix(actual, predicted))
+
+    # Print the precision and recall, among other metrics
+    print(metrics.classification_report(actual, predicted, digits=3))
     
 
 # %%
