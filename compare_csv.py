@@ -17,31 +17,34 @@ def extract_rows(file="Real World Failure-300-5.csv"):
         rows.append(next)
     return rows
 
+def find_intervals(rows, include_delays):
+    return find_intervals_with_delays(rows) if include_delays else find_intervals_no_delays(rows)
+
 ### intervals EXCLUDING Delays ###
-# def find_intervals(rows):
-#     intervals = []
-#     beg= 0
-#     end = 0
-#     new_interval = [0,0,""]
-#     for row in rows:
-#         cl = row[2]
-#         t_milli = float(row[1])*1000
+def find_intervals_no_delays(rows):
+    intervals = []
+    beg= 0
+    end = 0
+    new_interval = [0,0,""]
+    for row in rows:
+        cl = row[2]
+        t_milli = float(row[1])*1000
         
         
-#         if cl != "Delay":
-#             new_interval[0] = t_milli
-#             new_interval[2] = cl
-#         else:
-#             new_interval[1] = t_milli
+        if cl != "Delay":
+            new_interval[0] = t_milli
+            new_interval[2] = cl
+        else:
+            new_interval[1] = t_milli
         
-#         if new_interval[0] > 0 and new_interval[0] < new_interval[1]:
-#             intervals.append(new_interval)
-#             new_interval = [0,0, ""]
-#     return intervals
+        if new_interval[0] > 0 and new_interval[0] < new_interval[1]:
+            intervals.append(new_interval)
+            new_interval = [0,0, ""]
+    return intervals
 
 
 ### Intervals INCLUDING Delays ###
-def find_intervals(rows):
+def find_intervals_with_delays(rows):
     intervals = []
     beg= 0
     end = 0
@@ -79,7 +82,7 @@ def find_data_in_interval(interval, rows):
             data.append(row)
     return data
         
-def calculate_accuracy(grouped_intervals):
+def calculate_accuracy(grouped_intervals, include_delays):
     """_summary_
 
     Args:
@@ -116,8 +119,8 @@ def calculate_accuracy(grouped_intervals):
         
         if total != 0:
             accuracy = correct / total
-            
-        if prediction == "Delay":
+        
+        if include_delays and prediction == "Delay":
             accuracy = 1 if len(data) == 0 else 0
         accuracies.append(accuracy)
     return accuracies
@@ -127,14 +130,16 @@ if  __name__ ==  "__main__":
     ground_truth_csv = 'Real World Failure-300-5.csv'
     experimental_data_csv = 'REAL_5.csv'
     
+    include_delays = True
+    
     gt = extract_rows(ground_truth_csv) 
     data = extract_rows(experimental_data_csv)
     
-    intervals = find_intervals(gt)
+    intervals = find_intervals(gt, include_delays)
     # print(intervals)
     grouped_intervals = match_intervals(intervals, data)
     
-    x = calculate_accuracy(grouped_intervals)
+    x = calculate_accuracy(grouped_intervals, include_delays)
     x = np.mean(x)
     print(x)
 
