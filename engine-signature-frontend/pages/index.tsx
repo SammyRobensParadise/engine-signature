@@ -107,6 +107,14 @@ const Home: NextPage = () => {
     }
   }
 
+  useEffect(() => {
+    return () => {
+      if (socket) {
+        socket.emit('end');
+      }
+    };
+  }, []);
+
   function toggleListen() {
     if (listen) {
       setListen(false);
@@ -170,10 +178,11 @@ const Home: NextPage = () => {
   }, [recording]);
 
   useEffect(() => {
-    if (latestValues.length) {
+    const hasErrors = latestValues.filter((v) => v > errorThreshold.x / 100).length;
+    if (latestValues.length && hasErrors) {
       setShowShutdownMessage(true);
     }
-  }, [latestValues.length]);
+  }, [errorThreshold.x, latestValues]);
 
   return (
     <div className='bg-slate-100 min-h-screen'>

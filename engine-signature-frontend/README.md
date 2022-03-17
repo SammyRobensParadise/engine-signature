@@ -49,7 +49,17 @@ npm install
 4. Start the server and the Frontend. If you are using visual studio code. then you can navigate to the `Run and Debug` Tab and click on the Arrow called `Next.js debug full stack`. The vs code config is configured under `.vscode/launch.json`. Otherwise run:
 
 ```bash
-npm run dev-alone
+npm run dev
+```
+
+If you only want to run a production bundle (i.e you don't mind re-building every time) you can build and run a production bundle the upside to this is that the frontend is much more responsive.
+
+```bash
+npm run build # builds a production bundle in .next/
+```
+
+```bash
+npm run start # starts the server and frontend on http://localhost:3000
 ```
 
 This should output the following to your console:

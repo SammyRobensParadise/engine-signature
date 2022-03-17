@@ -7,7 +7,7 @@ s.boot;
 )
 
 // read a soundfile
-d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Isolated Failure Sounds/Background\ Noise.wav");
+d = Buffer.read(s, "/Users/sammyrobens-paradise/projects/engine-signature/Simulated Test Failures/Test-30-2.wav");
 
 // now play it
 (
@@ -21,6 +21,7 @@ Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
 ~toWekinator = NetAddr.new("127.0.0.1", 6448);
 )
 
+
 (
 x = {
     var in, fft, array;
@@ -32,7 +33,7 @@ x = {
 )
 
 (
-c = Bus(\control, 0, 4);
+c = Bus(\control, 0, 13);
 )
 
 // send coefficients
@@ -40,10 +41,11 @@ c = Bus(\control, 0, 4);
 r = {
 
     inf.do {
-		c.getn(4, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
+		c.getn(13, { |val| ~toWekinator.sendMsg("/wek/inputs",*val[0..]) });
 		0.01.wait; // 25 frames per second
-    }
+   }
 }.fork
 )
+
 
 r.stop;
