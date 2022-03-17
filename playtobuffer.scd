@@ -26,13 +26,26 @@ c.postln;
 
 // e = Buffer.read(s, b[2]);
 // d = c[3]
+
 (
-~class = "C";
+~class = "D";
 d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "_Concat.wav");
+~channels = 2;
+)
+
+(
+
+d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Real World Failures/Real World Failure-300-9.wav");
+~channels = 1;
+)
+
+(
+
+d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/Background Noise.wav");
+~channels = 1;
 )
 
 
-{ HPF.ar(in: d,freq: 440.0, mul: 1.0, add: 0.0) }.play
 // now play it
 // replace c[2] with c[i] for desired sound from list of buffers
 (
@@ -50,7 +63,9 @@ Out.ar( out, PlayBuf.ar(1, bufnum, BufRateScale.kr(bufnum), loop: 1))
 (
 x = {
 var in, fft, array;
-in = PlayBuf.ar(1, d, BufRateScale.kr(d), loop: 1);
+in = PlayBuf.ar(~channels, d, BufRateScale.kr(d), loop: 1);
+in = BPF.ar(in, freq:1250, rq:(1100/1250) , mul: 1.0, add: 0.0);
+
 fft = FFT(LocalBuf(1024), in); // for sampling rates 44100 and 48000
 array = MFCC.kr(fft);
 Out.kr(0, array); // control bus out
@@ -59,6 +74,7 @@ Out.kr(0, array); // control bus out
 
 (
 c = Bus(\control, 0, 13);
+
 )
 
 // send coefficients
