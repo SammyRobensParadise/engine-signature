@@ -86,7 +86,7 @@ def calculate_accuracy(grouped_intervals, include_delays):
         Returns Statistical information, including accuracy and precision as defined by:
         
         Accuracy: (True Positive + True Neg) / Total 
-        Precision: True Positive / True Pos + True False
+        Precision: True Positive / True Pos + True False ~ for each feature
     """
     accuracies = []
     
@@ -96,6 +96,22 @@ def calculate_accuracy(grouped_intervals, include_delays):
     feature_map['Feature-3""'] = "C"
     feature_map['Feature-4""'] = "D"
     feature_map[""] = "Delay"
+    
+    true_count = {}
+    true_count["A"] = 0
+    true_count["B"] = 0
+    true_count["C"] = 0
+    true_count["D"] = 0
+    true_count["Delay"] = 0
+    
+    
+    total_count = {}
+    total_count["A"] = 0
+    total_count["B"] = 0
+    total_count["C"] = 0
+    total_count["D"] = 0
+    total_count["Delay"] = 0
+    
     
     for interval in grouped_intervals:
         correct = 0
@@ -114,11 +130,24 @@ def calculate_accuracy(grouped_intervals, include_delays):
         
         if include_delays and prediction == "Delay":
             accuracy = 1 if len(data) == 0 else 0
+            correct = 1
+            total = 1
             
+        true_count[prediction] += correct
+        total_count[prediction] += total
+        
         accuracies.append(accuracy)
         
-    return accuracies
-            
+    return accuracies, true_count, total_count
+
+def display_results(true_count, total_count):
+    for i in true_count:
+        accuracy = 0
+        if total_count[i] != 0:
+            accuracy = true_count[i] / total_count[i]
+        print(f'Class: {i}  Accuracy: {accuracy}')
+
+    
         
 if  __name__ ==  "__main__":
     ground_truth_csv = 'Real World Failure-300-5.csv'
@@ -132,6 +161,14 @@ if  __name__ ==  "__main__":
     intervals = find_intervals(gt, include_delays)
     grouped_intervals = match_intervals(intervals, data)
     
-    x = calculate_accuracy(grouped_intervals, include_delays)
+    x,true_count,total_count = calculate_accuracy(grouped_intervals, include_delays)
     x = np.mean(x)
-    print(x)
+    print(x) # Average of averages foreach interval
+    print(true_count)
+    print(total_count)
+    
+    display_results(true_count, total_count)
+    
+    
+
+# %%
