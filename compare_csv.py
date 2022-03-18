@@ -137,10 +137,9 @@ def calculate_accuracy(grouped_intervals, include_delays):
             
             predicted.append(feature_map[d[1]])
             actual.append(prediction)
-            # else:
                 
             total += 1
-        
+            
         if total != 0:
             accuracy = correct / total
         
@@ -176,10 +175,11 @@ def display_results(true_count, total_count, include_delays):
         print(f'Class: {i}  Accuracy: {accuracy}')
 
     
-        
+#%%        
 if  __name__ ==  "__main__":
-    ground_truth_csv = 'Real World Failure-300-5.csv'
-    experimental_data_csv = 'REAL_5.csv'
+    num = 1
+    ground_truth_csv = f'Real World Failure-300-{num}.csv'
+    experimental_data_csv = f'REAL_{num}.csv'
     
     include_delays = False
     
@@ -193,12 +193,6 @@ if  __name__ ==  "__main__":
     x = np.mean(x)
     
     print(x) # Average of averages foreach interval
-    # print(true_count)
-    # print(total_count)
-    
-    # print(predicted)
-    # print(actual)
-    
     print("***** ACCURACIES ******")
     display_results(true_count, total_count, include_delays)
     
@@ -208,3 +202,5 @@ if  __name__ ==  "__main__":
     # Print the precision and recall, among other metrics
     print(metrics.classification_report(actual, predicted, digits=3))
     
+
+# %%

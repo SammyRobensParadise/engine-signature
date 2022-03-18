@@ -28,7 +28,7 @@ c.postln;
 // d = c[3]
 
 (
-~class = "D";
+~class = "B";
 d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/" ++ ~class ++ "_Concat.wav");
 ~channels = 2;
 )
@@ -42,7 +42,7 @@ d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Real World 
 (
 
 d = Buffer.read(s, "/Users/joshuawilkinson/Projects/engine-signature/Isolated Failure Sounds/Background Noise.wav");
-~channels = 1;
+~channels = 2;
 )
 
 
@@ -70,15 +70,16 @@ fft = FFT(LocalBuf(1024), in); // for sampling rates 44100 and 48000
 array = MFCC.kr(fft);
 Out.kr(0, array); // control bus out
 }.play;
-)
 
-(
+
+
+
 c = Bus(\control, 0, 13);
 
-)
+
 
 // send coefficients
-(
+
 r = {
 
     inf.do {
