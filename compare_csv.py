@@ -1,6 +1,5 @@
 #%%
 import csv
-import numpy as np
 from sklearn import metrics
 
 def extract_rows(file="Real World Failure-300-5.csv"):
