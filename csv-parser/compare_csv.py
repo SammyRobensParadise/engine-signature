@@ -1,6 +1,5 @@
 #%%
 import csv
-import numpy as np
 from sklearn import metrics
 
 def extract_rows(file="Real World Failure-300-5.csv"):
@@ -89,7 +88,6 @@ def calculate_accuracy(grouped_intervals, include_delays):
         Accuracy: (True Positive + True Neg) / Total 
         Precision: True Positive / True Pos + True False ~ for each feature
     """
-    accuracies = []
     
     feature_map = {}
     feature_map['Feature-1""'] = "A"
@@ -98,86 +96,30 @@ def calculate_accuracy(grouped_intervals, include_delays):
     feature_map['Feature-4""'] = "D"
     feature_map[""] = "Delay"
     
-    true_count = {}
-    true_count["A"] = 0
-    true_count["B"] = 0
-    true_count["C"] = 0
-    true_count["D"] = 0
-    true_count["Delay"] = 0
-    
-    false_pos_count = {}
-    false_pos_count["A"] = 0
-    false_pos_count["B"] = 0
-    false_pos_count["C"] = 0
-    false_pos_count["D"] = 0
-    false_pos_count["Delay"] = 0
-    
-    
-    total_count = {}
-    total_count["A"] = 0
-    total_count["B"] = 0
-    total_count["C"] = 0
-    total_count["D"] = 0
-    total_count["Delay"] = 0
-    
     predicted = []
     actual = []
     
     for interval in grouped_intervals:
-        correct = 0
-        total = 0
         prediction = interval["prediction"]
         data = interval["data"]
-        accuracy = 0
         
-        for d in data:
-            if feature_map[d[1]] == prediction:
-                correct += 1
-            
-            
+        for d in data:          
             predicted.append(feature_map[d[1]])
             actual.append(prediction)
                 
-            total += 1
-            
-        if total != 0:
-            accuracy = correct / total
-        
         if include_delays and prediction == "Delay":
             if len(data) == 0:
-                accuracy = 1
-                correct = 1
-                total = 1
                 predicted.append("Delay")
-                
-                
-            else:
-                accuracy = 0
-                
+            else:             
                 predicted.append(feature_map[d[1]])
-            
             actual.append("Delay")
-            
-        true_count[prediction] += correct
-        total_count[prediction] += total
         
-        accuracies.append(accuracy)
-        
-    return accuracies, true_count, total_count, predicted, actual
-
-def display_results(true_count, total_count, include_delays):
-    for i in true_count:
-        accuracy = 0
-        if total_count[i] != 0:
-            accuracy = true_count[i] / total_count[i]
-        if not(include_delays) and i == "Delay":
-            continue
-        print(f'Class: {i}  Accuracy: {accuracy}')
+    return predicted, actual
 
     
 #%%        
 if  __name__ ==  "__main__":
-    num = 1
+    num = 5
     ground_truth_csv = f'Real World Failure-300-{num}.csv'
     experimental_data_csv = f'REAL_{num}.csv'
     
@@ -189,18 +131,11 @@ if  __name__ ==  "__main__":
     intervals = find_intervals(gt, include_delays)
     grouped_intervals = match_intervals(intervals, data)
     
-    x,true_count,total_count, predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
-    x = np.mean(x)
-    
-    print(x) # Average of averages foreach interval
-    print("***** ACCURACIES ******")
-    display_results(true_count, total_count, include_delays)
-    
+    predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
+
     print("**** CONFUSION MATRIX ****")
     print(metrics.confusion_matrix(actual, predicted))
 
     # Print the precision and recall, among other metrics
     print(metrics.classification_report(actual, predicted, digits=3))
     
-
-# %%
