@@ -2,7 +2,9 @@
 import csv
 from sklearn import metrics
 import math
-
+import os
+import numpy as np
+    
 def extract_rows(file="Real World Failure-300-5.csv"):
     file = open(file)
     csvreader = csv.reader(file)
@@ -117,7 +119,14 @@ def calculate_accuracy(grouped_intervals, include_delays):
         
     return predicted, actual
 
-def calculate_cross_entropy(predicted, actual):
+def calculate_cross_entropy(ground_truth_csv, experimental_data_csv):
+    gt = extract_rows(ground_truth_csv) 
+    data = extract_rows(experimental_data_csv)
+    
+    intervals = find_intervals(gt, include_delays)
+    grouped_intervals = match_intervals(intervals, data)
+    
+    predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
     p = {}
     p['A'] = 0.0001
     p['B'] = 0.0001
@@ -145,7 +154,30 @@ def calculate_cross_entropy(predicted, actual):
         
     c_e = -( (y['A']/total) *math.log(p['A']/total,2) + (y['B']/total)*math.log(p['B']/total,2) + (y['C']/total)*math.log(p['C']/total,2) + (y['D']/total)*math.log(p['D']/total,2))
 
-    return c_e    
+    return c_e
+
+def load_directory(path):
+    file_names = []
+    i = 0
+    for file in os.listdir(path):
+        if i == 10:
+            break
+        if file.endswith(".csv"):
+           file_names.append(file)
+        i += 1
+    return file_names
+
+def cross_entropy_bulk(experimental_dir, ground_truth_path):
+    # print(os.listdir(real_path))
+    c_e_vals = []
+    for n in range(1,11):
+        ground_truth_csv = f'{ground_truth_path}Real World Failure-300-{n}.csv'
+        experimental_data_csv = f'{experimental_dir}REAL_{n}.csv'
+        c_e = calculate_cross_entropy(ground_truth_csv, experimental_data_csv)
+        c_e_vals.append(c_e)
+    # print(c_e_vals)
+    return np.mean(c_e_vals)
+        
     
 #%%        
 if  __name__ ==  "__main__":
@@ -153,19 +185,26 @@ if  __name__ ==  "__main__":
     ground_truth_csv = f'Real World Failure-300-{num}.csv'
     experimental_data_csv = f'REAL_{num}.csv'
     
+    collected_dir = "../collected_data/"
+    real_data_dir = "../test-data/Real World Failures/"
+    
     include_delays = False
     
-    gt = extract_rows(ground_truth_csv) 
-    data = extract_rows(experimental_data_csv)
+    # gt = extract_rows(ground_truth_csv) 
+    # data = extract_rows(experimental_data_csv)
     
-    intervals = find_intervals(gt, include_delays)
-    grouped_intervals = match_intervals(intervals, data)
+    # intervals = find_intervals(gt, include_delays)
+    # grouped_intervals = match_intervals(intervals, data)
     
-    predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
+    # predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
     
-    c_e = calculate_cross_entropy(predicted, actual)    
+    # c_e = calculate_cross_entropy(predicted, actual)    
     
-    print(f"Cross Entropy Loss: {c_e}")
+    # print(f"Cross Entropy Loss: {c_e}")
+    
+    avg_cross_entropy = cross_entropy_bulk(collected_dir, real_data_dir)
+    print(f"Average Cross Entropy Loss: {avg_cross_entropy}")
+    # print(load_directory(collected_dir))
 
     # print("**** CONFUSION MATRIX ****")
     # print(metrics.confusion_matrix(actual, predicted))
@@ -173,4 +212,3 @@ if  __name__ ==  "__main__":
     # Print the precision and recall, among other metrics
     # print(metrics.classification_report(actual, predicted, digits=3))
     
-# %%
