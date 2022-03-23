@@ -1,6 +1,7 @@
 #%%
 import csv
 from sklearn import metrics
+import math
 
 def extract_rows(file="Real World Failure-300-5.csv"):
     file = open(file)
@@ -116,6 +117,35 @@ def calculate_accuracy(grouped_intervals, include_delays):
         
     return predicted, actual
 
+def calculate_cross_entropy(predicted, actual):
+    p = {}
+    p['A'] = 0.0001
+    p['B'] = 0.0001
+    p['C'] = 0.0001
+    p['D'] = 0.0001
+    p['total'] = 0
+    
+    y = {}
+    y['A'] = 0.0001
+    y['B'] = 0.0001
+    y['C'] = 0.0001
+    y['D'] = 0.0001
+    y['total'] = 0
+    
+    
+    
+    for i in predicted:
+        p[i] += 1
+        p['total'] += 1
+    for i in actual:
+        y[i] += 1
+        y['total'] += 1
+        
+    total = y['total']
+        
+    c_e = -( (y['A']/total) *math.log(p['A']/total,2) + (y['B']/total)*math.log(p['B']/total,2) + (y['C']/total)*math.log(p['C']/total,2) + (y['D']/total)*math.log(p['D']/total,2))
+
+    return c_e    
     
 #%%        
 if  __name__ ==  "__main__":
@@ -132,10 +162,15 @@ if  __name__ ==  "__main__":
     grouped_intervals = match_intervals(intervals, data)
     
     predicted, actual = calculate_accuracy(grouped_intervals, include_delays)
+    
+    c_e = calculate_cross_entropy(predicted, actual)    
+    
+    print(f"Cross Entropy Loss: {c_e}")
 
-    print("**** CONFUSION MATRIX ****")
-    print(metrics.confusion_matrix(actual, predicted))
+    # print("**** CONFUSION MATRIX ****")
+    # print(metrics.confusion_matrix(actual, predicted))
 
     # Print the precision and recall, among other metrics
-    print(metrics.classification_report(actual, predicted, digits=3))
+    # print(metrics.classification_report(actual, predicted, digits=3))
     
+# %%
