@@ -151,12 +151,14 @@ def calculate_cross_entropy(ground_truth_csv, experimental_data_csv):
         y['total'] += 1
         
     total = y['total']
-        
-    c_e = -( (y['A']/total) *math.log(p['A']/total,2) + (y['B']/total)*math.log(p['B']/total,2) + (y['C']/total)*math.log(p['C']/total,2) + (y['D']/total)*math.log(p['D']/total,2))
-
-
+    base = 10
+    c_e = -( (y['A']/total) *math.log(p['A']/total,base) + 
+            (y['B']/total)*math.log(p['B']/total,base) + 
+            (y['C']/total)*math.log(p['C']/total,base) + 
+            (y['D']/total)*math.log(p['D']/total,base))/total
     recall = (metrics.recall_score(y_true=actual, y_pred=predicted, average='macro'))
     accuracy = (metrics.accuracy_score(y_true=actual, y_pred=predicted))
+    
     return c_e, recall, accuracy
 
 def load_directory(path):
@@ -218,7 +220,7 @@ if  __name__ ==  "__main__":
     print(f"Prototype Average Recall: {avg_recall}")
     print(f"Prototype Average Accuracy: {avg_accuracy}")
     
-    w1, w2, w3 = 1,1,1
+    w1, w2, w3 = 0.33,0.33,0.33
     
     cost = w1*avg_cross_entropy + w2*(1-avg_accuracy) + w3*(1-avg_recall)
     print(f"Cost Value: {cost}")
