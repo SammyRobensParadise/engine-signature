@@ -11,6 +11,7 @@ ML engine diagnosing engine failure from engine sounds developed using Wekinator
 - [Training Data](/training-data)
 - [References](/references)
 - [Models](/engine-signature_wekinator)
+- [Analysis](/analysis)
 - [SuperCollider Buffer](/playtobuffer.scd)
 - [License](/LICENSE)
 
