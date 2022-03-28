@@ -154,7 +154,10 @@ def calculate_cross_entropy(ground_truth_csv, experimental_data_csv):
         
     c_e = -( (y['A']/total) *math.log(p['A']/total,2) + (y['B']/total)*math.log(p['B']/total,2) + (y['C']/total)*math.log(p['C']/total,2) + (y['D']/total)*math.log(p['D']/total,2))
 
-    return c_e
+
+    recall = (metrics.recall_score(y_true=actual, y_pred=predicted, average='macro'))
+    accuracy = (metrics.accuracy_score(y_true=actual, y_pred=predicted))
+    return c_e, recall, accuracy
 
 def load_directory(path):
     file_names = []
@@ -167,26 +170,34 @@ def load_directory(path):
         i += 1
     return file_names
 
-def cross_entropy_bulk(experimental_dir, ground_truth_path):
+def cross_entropy_bulk(experimental_dir, ground_truth_path, real_filename):
     # print(os.listdir(real_path))
     c_e_vals = []
+    recall_vals = []
+    accuracy_vals = []
     for n in range(1,11):
         ground_truth_csv = f'{ground_truth_path}Real World Failure-300-{n}.csv'
-        experimental_data_csv = f'{experimental_dir}REAL_{n}.csv'
-        c_e = calculate_cross_entropy(ground_truth_csv, experimental_data_csv)
+        experimental_data_csv = f'{experimental_dir}{real_filename}{n}.csv'
+        c_e, recall, accuracy = calculate_cross_entropy(ground_truth_csv, experimental_data_csv)
         c_e_vals.append(c_e)
+        recall_vals.append(recall)
+        accuracy_vals.append(accuracy)
     # print(c_e_vals)
-    return np.mean(c_e_vals)
+    return np.mean(c_e_vals), np.mean(recall_vals), np.mean(accuracy_vals)
         
     
 #%%        
 if  __name__ ==  "__main__":
-    num = 5
-    ground_truth_csv = f'Real World Failure-300-{num}.csv'
-    experimental_data_csv = f'REAL_{num}.csv'
+    # num = 5
+    # ground_truth_csv = f'Real World Failure-300-{num}.csv'
+    # experimental_data_csv = f'REAL_{num}.csv'
     
     collected_dir = "../collected_data/"
+    real_filename = "REAL_"
+    
     real_data_dir = "../test-data/Real World Failures/"
+    
+    
     
     include_delays = False
     
@@ -202,8 +213,10 @@ if  __name__ ==  "__main__":
     
     # print(f"Cross Entropy Loss: {c_e}")
     
-    avg_cross_entropy = cross_entropy_bulk(collected_dir, real_data_dir)
-    print(f"Average Cross Entropy Loss: {avg_cross_entropy}")
+    avg_cross_entropy, avg_recall, avg_accuracy = cross_entropy_bulk(collected_dir, real_data_dir, real_filename)
+    print(f"Prototype Average Cross Entropy Loss: {avg_cross_entropy}")
+    print(f"Prototype Average Recall: {avg_recall}")
+    print(f"Prototype Average Accuracy: {avg_accuracy}")
     # print(load_directory(collected_dir))
 
     # print("**** CONFUSION MATRIX ****")
@@ -212,3 +225,4 @@ if  __name__ ==  "__main__":
     # Print the precision and recall, among other metrics
     # print(metrics.classification_report(actual, predicted, digits=3))
     
+# %%
