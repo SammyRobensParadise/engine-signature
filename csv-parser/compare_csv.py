@@ -218,7 +218,7 @@ if  __name__ ==  "__main__":
     print(f"Prototype Average Recall: {avg_recall}")
     print(f"Prototype Average Accuracy: {avg_accuracy}")
     
-    w1, w2, w3 = 0.33, 0.33, 0.33
+    w1, w2, w3 = 1,1,1
     
     cost = w1*avg_cross_entropy + w2*(1-avg_accuracy) + w3*(1-avg_recall)
     print(f"Cost Value: {cost}")
