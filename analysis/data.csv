@@ -1,0 +1,6 @@
+Prototype,Center Frequency,Mean Accuracy from all tests (%),Passband Start,Passband End
+1,0,0,0,3300
+2,1700,29.27,700,2400
+3,2700,27.55,600,3300
+4,1100,23.31,700,1800
+5,950,23.95,650,1600
